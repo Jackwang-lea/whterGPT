@@ -1,5 +1,9 @@
-import { createContext, useContext, useState, ReactNode } from 'react';
+import { createContext, useContext, useState, ReactNode, useEffect } from 'react';
 import { Script, Character, Scene, WorkflowStep } from '../types';
+
+// localStorage key
+const SCRIPTS_STORAGE_KEY = 'murderMysteryScripts';
+const CURRENT_SCRIPT_ID_KEY = 'currentMurderMysteryScriptId';
 
 interface ScriptContextType {
   scripts: Script[];
@@ -27,8 +31,46 @@ export const useScriptContext = () => {
 };
 
 export const ScriptProvider = ({ children }: { children: ReactNode }) => {
-  const [scripts, setScripts] = useState<Script[]>([]);
-  const [currentScriptId, setCurrentScriptId] = useState<string | null>(null);
+  // 从 localStorage 获取初始数据
+  const getInitialScripts = (): Script[] => {
+    const savedScripts = localStorage.getItem(SCRIPTS_STORAGE_KEY);
+    if (savedScripts) {
+      try {
+        const parsedScripts = JSON.parse(savedScripts);
+        // 修复日期值（从字符串转回Date对象）
+        return parsedScripts.map((script: any) => ({
+          ...script,
+          createdAt: new Date(script.createdAt),
+          updatedAt: new Date(script.updatedAt),
+        }));
+      } catch (error) {
+        console.error('Error parsing scripts from localStorage:', error);
+        return [];
+      }
+    }
+    return [];
+  };
+
+  const getInitialScriptId = (): string | null => {
+    return localStorage.getItem(CURRENT_SCRIPT_ID_KEY);
+  };
+
+  const [scripts, setScripts] = useState<Script[]>(getInitialScripts);
+  const [currentScriptId, setCurrentScriptId] = useState<string | null>(getInitialScriptId);
+
+  // 当scripts变化时，保存到localStorage
+  useEffect(() => {
+    localStorage.setItem(SCRIPTS_STORAGE_KEY, JSON.stringify(scripts));
+  }, [scripts]);
+
+  // 当currentScriptId变化时，保存到localStorage
+  useEffect(() => {
+    if (currentScriptId) {
+      localStorage.setItem(CURRENT_SCRIPT_ID_KEY, currentScriptId);
+    } else {
+      localStorage.removeItem(CURRENT_SCRIPT_ID_KEY);
+    }
+  }, [currentScriptId]);
 
   const currentScript = currentScriptId 
     ? scripts.find(script => script.id === currentScriptId) || null
@@ -52,9 +94,14 @@ export const ScriptProvider = ({ children }: { children: ReactNode }) => {
   };
 
   const updateScript = (updatedScript: Script) => {
+    const scriptWithUpdatedDate = {
+      ...updatedScript,
+      updatedAt: new Date()
+    };
+    
     setScripts(scripts.map(script => 
       script.id === updatedScript.id 
-        ? { ...updatedScript, updatedAt: new Date() } 
+        ? scriptWithUpdatedDate
         : script
     ));
   };

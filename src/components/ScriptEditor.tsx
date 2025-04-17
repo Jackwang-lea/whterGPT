@@ -5,12 +5,35 @@ export default function ScriptEditor() {
   const { currentScript, updateOutline, saveEditPosition } = useScriptContext();
   const [content, setContent] = useState('');
   const [isEditing, setIsEditing] = useState(true);
+  const [lastSavedContent, setLastSavedContent] = useState('');
+  const [showSaveNotification, setShowSaveNotification] = useState(false);
 
   useEffect(() => {
     if (currentScript) {
       setContent(currentScript.outline || '');
+      setLastSavedContent(currentScript.outline || '');
     }
   }, [currentScript]);
+
+  // 自动保存功能 - 当内容改变且停止输入1秒后自动保存
+  useEffect(() => {
+    if (!currentScript || content === lastSavedContent) return;
+    
+    const saveTimer = setTimeout(() => {
+      updateOutline(content);
+      setLastSavedContent(content);
+      showSaveSuccess();
+    }, 1000);
+    
+    return () => clearTimeout(saveTimer);
+  }, [content, currentScript, lastSavedContent, updateOutline]);
+
+  const showSaveSuccess = () => {
+    setShowSaveNotification(true);
+    setTimeout(() => {
+      setShowSaveNotification(false);
+    }, 2000);
+  };
 
   if (!currentScript) {
     return (
@@ -26,6 +49,8 @@ export default function ScriptEditor() {
 
   const handleSave = () => {
     updateOutline(content);
+    setLastSavedContent(content);
+    showSaveSuccess();
     saveEditPosition({
       cursorPosition: document.activeElement instanceof HTMLTextAreaElement 
         ? document.activeElement.selectionStart 
@@ -64,17 +89,26 @@ export default function ScriptEditor() {
   };
 
   return (
-    <div className="h-full flex flex-col">
+    <div className="h-full flex flex-col relative">
+      {showSaveNotification && (
+        <div className="absolute top-2 right-2 bg-green-100 text-green-700 px-4 py-2 rounded shadow-md z-10 animate-fadeIn">
+          内容已自动保存
+        </div>
+      )}
+      
       <div className="bg-white shadow-sm border-b px-4 py-2 flex justify-between items-center">
         <h1 className="text-xl font-semibold text-gray-800">{currentScript.title}</h1>
-        <div className="flex gap-2">
+        <div className="flex gap-2 items-center">
+          <span className="text-xs text-gray-500">
+            {content !== lastSavedContent ? '编辑中...' : '已保存'}
+          </span>
           <button
             onClick={() => setIsEditing(!isEditing)}
             className="px-3 py-1 text-sm border rounded-md text-gray-600 hover:bg-gray-50"
           >
             {isEditing ? '预览' : '编辑'}
           </button>
-          {isEditing && (
+          {isEditing && content !== lastSavedContent && (
             <button
               onClick={handleSave}
               className="px-3 py-1 text-sm bg-blue-600 text-white rounded-md hover:bg-blue-700"

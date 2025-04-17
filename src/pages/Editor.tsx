@@ -4,7 +4,10 @@ import { useScriptContext } from '../context/ScriptContext';
 import Layout from '../components/Layout';
 import ScriptEditor from '../components/ScriptEditor';
 import WorkflowView from '../components/WorkflowView';
+import CharacterManager from '../components/CharacterManager';
 import Copilot from '../components/Copilot';
+import SceneManager from '../components/SceneManager';
+import DraftGenerator from '../components/DraftGenerator';
 
 export default function Editor() {
   const { scriptId } = useParams<{ scriptId?: string }>();
@@ -35,12 +38,29 @@ export default function Editor() {
     );
   }
 
+  // 根据当前工作流步骤渲染对应的编辑器组件
+  const renderEditorComponent = () => {
+    switch (currentScript.currentStep) {
+      case 'outline':
+        return <ScriptEditor />;
+      case 'characters':
+      case 'relationships':
+        return <CharacterManager />;
+      case 'scenes':
+        return <SceneManager />;
+      case 'draft':
+        return <DraftGenerator />;
+      default:
+        return <ScriptEditor />;
+    }
+  };
+
   return (
     <Layout>
       <div className="p-6">
         <WorkflowView />
         <div className="bg-white shadow rounded-lg h-[calc(100vh-13rem)]">
-          <ScriptEditor />
+          {renderEditorComponent()}
         </div>
       </div>
       <Copilot />
