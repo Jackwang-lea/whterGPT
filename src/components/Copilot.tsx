@@ -54,12 +54,24 @@ const addGlobalStyles = () => {
       background-color: #1d4ed8;
       box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.2), 0 4px 6px -2px rgba(0, 0, 0, 0.1);
     }
+    .copilot-container {
+      transition: opacity 0.3s ease, transform 0.3s ease;
+    }
+    .copilot-container.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+    .copilot-container.hidden {
+      opacity: 0;
+      transform: translateY(20px);
+      pointer-events: none;
+    }
   `;
   document.head.appendChild(styleEl);
 };
 
 // 为了确保在控制台日志中显示状态变化
-function debugLog(message, ...args) {
+function debugLog(message: string, ...args: any[]): void {
   console.log(`%c[Copilot Debug] ${message}`, 'background: #3b82f6; color: white; padding: 2px 4px; border-radius: 2px;', ...args);
 }
 
@@ -91,9 +103,10 @@ export default function Copilot() {
   const initialPos = useRef({ x: 0, y: 0 });
   const lastFrameRef = useRef(0); // 用于requestAnimationFrame
   const dragStarted = useRef(false); // 跟踪拖动是否开始
+  const lastUpdateTime = useRef(0); // 用于控制拖动更新频率
   
-  // 控制Copilot的显示状态 - 默认显示
-  const [isVisible, setIsVisible] = useState(true);
+  // 控制Copilot的显示状态 - 默认隐藏
+  const [isVisible, setIsVisible] = useState(false);
 
   // 添加全局样式
   useEffect(() => {
@@ -116,11 +129,16 @@ export default function Copilot() {
     }
   }, []);
 
-  // 使用requestAnimationFrame更新位置，增强性能
+  // 使用requestAnimationFrame更新位置，增强性能，并降低灵敏度
   const updateDragPosition = (clientX: number, clientY: number) => {
     if (!isDragging) return;
     
     cancelAnimationFrame(lastFrameRef.current);
+    
+    // 降低更新频率，每50ms更新一次位置
+    const now = Date.now();
+    if (now - lastUpdateTime.current < 50) return;
+    lastUpdateTime.current = now;
     
     lastFrameRef.current = requestAnimationFrame(() => {
       if (!dragRef.current) return;
@@ -128,6 +146,10 @@ export default function Copilot() {
       // 计算新位置
       const dx = clientX - dragStartPos.x;
       const dy = clientY - dragStartPos.y;
+      
+      // 添加最小移动阈值，小于5px的移动忽略
+      const moveThreshold = 5;
+      if (Math.abs(dx) < moveThreshold && Math.abs(dy) < moveThreshold) return;
       
       const newX = initialPos.current.x + dx;
       const newY = initialPos.current.y + dy;
@@ -161,6 +183,7 @@ export default function Copilot() {
       initialPos.current = { x: position.x, y: position.y };
       setDragStartPos({ x: e.clientX, y: e.clientY });
       setIsDragging(true);
+      lastUpdateTime.current = Date.now(); // 初始化更新时间
       
       // 添加拖动中类名，用于自定义样式
       dragRef.current.classList.add('dragging');
@@ -383,250 +406,250 @@ export default function Copilot() {
         <span style={{ fontSize: '28px' }}>🤖</span>
       </div>
       
-      {isVisible && (
-        <div 
-          ref={dragRef}
-          className={`fixed z-50 transform duration-75 will-change-transform ${
-            isDragging ? 'cursor-grabbing opacity-95 dragging' : 'hover:shadow-xl'
-          }`}
-          style={{
-            transform: `translate3d(${position.x}px, ${position.y}px, 0)`,
-            width: '380px',
-            filter: isDragging ? 'brightness(0.98)' : 'none',
-            willChange: 'transform',
-            boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1)'
-          }}
-          onMouseDown={handleMouseDown}
-          onTouchStart={(e) => {
-            if ((e.target as HTMLElement).closest('.copilot-drag-handle')) {
-              e.preventDefault();
-              const touch = e.touches[0];
-              initialPos.current = { x: position.x, y: position.y };
-              setDragStartPos({ x: touch.clientX, y: touch.clientY });
-              setIsDragging(true);
-              
-              if (dragRef.current) {
-                dragRef.current.classList.add('dragging');
-              }
+      {/* Copilot主界面 - 使用CSS类控制动画过渡 */}
+      <div 
+        ref={dragRef}
+        className={`fixed z-50 transform duration-75 will-change-transform copilot-container ${isVisible ? 'visible' : 'hidden'} ${
+          isDragging ? 'cursor-grabbing opacity-95 dragging' : 'hover:shadow-xl'
+        }`}
+        style={{
+          transform: `translate3d(${position.x}px, ${position.y}px, 0)`,
+          width: '380px',
+          filter: isDragging ? 'brightness(0.98)' : 'none',
+          willChange: 'transform',
+          boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1)'
+        }}
+        onMouseDown={handleMouseDown}
+        onTouchStart={(e) => {
+          if ((e.target as HTMLElement).closest('.copilot-drag-handle')) {
+            e.preventDefault();
+            const touch = e.touches[0];
+            initialPos.current = { x: position.x, y: position.y };
+            setDragStartPos({ x: touch.clientX, y: touch.clientY });
+            setIsDragging(true);
+            lastUpdateTime.current = Date.now(); // 初始化更新时间
+            
+            if (dragRef.current) {
+              dragRef.current.classList.add('dragging');
             }
-          }}
+          }
+        }}
+      >
+        <div 
+          className={`relative overflow-hidden rounded-lg transition-all duration-300 ease-in-out ${isExpanded ? 'h-[450px]' : 'h-12'} 
+          bg-white border border-gray-200 shadow-lg ${!isDragging ? 'hover:border-blue-300' : ''}`}
         >
+          {/* Header */}
           <div 
-            className={`relative overflow-hidden rounded-lg transition-all duration-300 ease-in-out ${isExpanded ? 'h-[450px]' : 'h-12'} 
-            bg-white border border-gray-200 shadow-lg ${!isDragging ? 'hover:border-blue-300' : ''}`}
+            className="bg-blue-600 text-white p-3 flex justify-between items-center copilot-drag-handle select-none"
+            onClick={(e) => {
+              // 确保只有当它不是拖动结束时才切换展开状态
+              if (!isDragging) {
+                setIsExpanded(!isExpanded);
+              }
+            }}
           >
-            {/* Header */}
-            <div 
-              className="bg-blue-600 text-white p-3 flex justify-between items-center copilot-drag-handle select-none"
-              onClick={(e) => {
-                // 确保只有当它不是拖动结束时才切换展开状态
-                if (!isDragging) {
-                  setIsExpanded(!isExpanded);
-                }
-              }}
-            >
-              <div className="flex items-center">
-                <span className="mr-2 text-xl">🤖</span>
-                <h3 className="font-semibold text-white">
-                  {isExpanded ? "Copilot 创作助手" : "Copilot 创作助手 - 点击展开"}
-                </h3>
-              </div>
-              <div className="flex items-center">
-                {isExpanded && (
-                  <span className="text-xs mr-3 bg-blue-700 px-2 py-1 rounded flex items-center">
-                    <span className="mr-1">✋</span> 
-                    可拖动
-                  </span>
-                )}
-                <span className="transition-transform duration-300" style={{
-                  transform: isExpanded ? 'rotate(180deg)' : 'rotate(0deg)'
-                }}>▼</span>
-              </div>
+            <div className="flex items-center">
+              <span className="mr-2 text-xl">🤖</span>
+              <h3 className="font-semibold text-white">
+                {isExpanded ? "Copilot 创作助手" : "Copilot 创作助手 - 点击展开"}
+              </h3>
             </div>
+            <div className="flex items-center">
+              {isExpanded && (
+                <span className="text-xs mr-3 bg-blue-700 px-2 py-1 rounded flex items-center">
+                  <span className="mr-1">✋</span> 
+                  可拖动
+                </span>
+              )}
+              <span className="transition-transform duration-300" style={{
+                transform: isExpanded ? 'rotate(180deg)' : 'rotate(0deg)'
+              }}>▼</span>
+            </div>
+          </div>
 
-            {isExpanded && (
-              <>
-                {showGuidedCreation ? (
-                  <div className="p-3 overflow-y-auto h-full bg-gray-50">
-                    <div className="mb-3 flex justify-between items-center">
-                      <h4 className="font-medium text-gray-800">引导式创作</h4>
-                      <button 
-                        onClick={() => setShowGuidedCreation(false)}
-                        className="text-gray-500 hover:text-gray-700"
-                      >
-                        返回
-                      </button>
+          {isExpanded && (
+            <>
+              {showGuidedCreation ? (
+                <div className="p-3 overflow-y-auto h-full bg-gray-50">
+                  <div className="mb-3 flex justify-between items-center">
+                    <h4 className="font-medium text-gray-800">引导式创作</h4>
+                    <button 
+                      onClick={() => setShowGuidedCreation(false)}
+                      className="text-gray-500 hover:text-gray-700"
+                    >
+                      返回
+                    </button>
+                  </div>
+                  
+                  {isGenerating ? (
+                    <div className="text-center py-6">
+                      <p className="mb-3 font-medium">{
+                        currentGenerationStep === 'outline' ? '正在生成剧本大纲...' :
+                        currentGenerationStep === 'characters' ? '正在设计角色...' :
+                        currentGenerationStep === 'relationships' ? '正在构建角色关系...' :
+                        currentGenerationStep === 'scenes' ? '正在分配场景...' :
+                        '正在完成剧本初稿...'
+                      }</p>
+                      <div className="w-full bg-gray-200 rounded-full h-2.5 mb-3">
+                        <div className="bg-blue-600 h-2.5 rounded-full transition-all duration-500" style={{ width: `${generationProgress}%` }}></div>
+                      </div>
+                      <p className="text-sm text-gray-500">AI正在处理您的输入，请稍候...</p>
                     </div>
-                    
-                    {isGenerating ? (
-                      <div className="text-center py-6">
-                        <p className="mb-3 font-medium">{
-                          currentGenerationStep === 'outline' ? '正在生成剧本大纲...' :
-                          currentGenerationStep === 'characters' ? '正在设计角色...' :
-                          currentGenerationStep === 'relationships' ? '正在构建角色关系...' :
-                          currentGenerationStep === 'scenes' ? '正在分配场景...' :
-                          '正在完成剧本初稿...'
-                        }</p>
-                        <div className="w-full bg-gray-200 rounded-full h-2.5 mb-3">
-                          <div className="bg-blue-600 h-2.5 rounded-full transition-all duration-500" style={{ width: `${generationProgress}%` }}></div>
-                        </div>
-                        <p className="text-sm text-gray-500">AI正在处理您的输入，请稍候...</p>
+                  ) : (
+                    <>
+                      <div className="mb-4">
+                        <label className="block text-gray-700 text-sm font-medium mb-1">
+                          故事背景
+                        </label>
+                        <textarea
+                          value={storyBackground}
+                          onChange={(e) => setStoryBackground(e.target.value)}
+                          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200"
+                          rows={3}
+                          placeholder="描述故事的时代、地点、社会背景等信息..."
+                        />
+                      </div>
+                      
+                      <div className="mb-4">
+                        <label className="block text-gray-700 text-sm font-medium mb-1">
+                          角色设定 & 角色关系
+                        </label>
+                        <textarea
+                          value={characterSettings}
+                          onChange={(e) => setCharacterSettings(e.target.value)}
+                          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200"
+                          rows={4}
+                          placeholder="角色1: 描述角色1的身份和特点&#10;角色2: 描述角色2的身份和特点&#10;角色1与角色2的关系: 描述他们之间的关系"
+                        />
+                      </div>
+                      
+                      <button
+                        onClick={simulateAiGeneration}
+                        disabled={!storyBackground.trim() || !characterSettings.trim() || !currentScript}
+                        className={`w-full py-2 rounded-md font-medium transition-all duration-200 ${
+                          !storyBackground.trim() || !characterSettings.trim() || !currentScript
+                            ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                            : 'bg-blue-600 text-white hover:bg-blue-700 hover:shadow-md'
+                        }`}
+                      >
+                        开始AI引导式创作
+                      </button>
+                      
+                      <p className="text-xs text-gray-500 mt-2 text-center">
+                        AI将按照剧本创作流程，依次生成大纲、角色、场景和初稿
+                      </p>
+                    </>
+                  )}
+                </div>
+              ) : (
+                <>
+                  {/* Messages area */}
+                  <div className="h-60 overflow-y-auto p-3 bg-gray-50 scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100">
+                    {messages.length === 0 ? (
+                      <div className="text-center py-6 text-gray-500">
+                        <p>你好，我是你的剧本创作助手！</p>
+                        <p className="text-sm mt-2">有什么可以帮助你的？</p>
                       </div>
                     ) : (
-                      <>
-                        <div className="mb-4">
-                          <label className="block text-gray-700 text-sm font-medium mb-1">
-                            故事背景
-                          </label>
-                          <textarea
-                            value={storyBackground}
-                            onChange={(e) => setStoryBackground(e.target.value)}
-                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200"
-                            rows={3}
-                            placeholder="描述故事的时代、地点、社会背景等信息..."
-                          />
-                        </div>
-                        
-                        <div className="mb-4">
-                          <label className="block text-gray-700 text-sm font-medium mb-1">
-                            角色设定 & 角色关系
-                          </label>
-                          <textarea
-                            value={characterSettings}
-                            onChange={(e) => setCharacterSettings(e.target.value)}
-                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200"
-                            rows={4}
-                            placeholder="角色1: 描述角色1的身份和特点&#10;角色2: 描述角色2的身份和特点&#10;角色1与角色2的关系: 描述他们之间的关系"
-                          />
-                        </div>
-                        
-                        <button
-                          onClick={simulateAiGeneration}
-                          disabled={!storyBackground.trim() || !characterSettings.trim() || !currentScript}
-                          className={`w-full py-2 rounded-md font-medium transition-all duration-200 ${
-                            !storyBackground.trim() || !characterSettings.trim() || !currentScript
-                              ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                              : 'bg-blue-600 text-white hover:bg-blue-700 hover:shadow-md'
-                          }`}
+                      messages.map((message) => (
+                        <div 
+                          key={message.id} 
+                          className={`mb-3 ${message.role === 'user' ? 'text-right' : ''}`}
                         >
-                          开始AI引导式创作
-                        </button>
-                        
-                        <p className="text-xs text-gray-500 mt-2 text-center">
-                          AI将按照剧本创作流程，依次生成大纲、角色、场景和初稿
-                        </p>
-                      </>
+                          <div 
+                            className={`inline-block px-3 py-2 rounded-lg max-w-[80%] shadow-sm ${
+                              message.role === 'user' 
+                                ? 'bg-blue-600 text-white' 
+                                : 'bg-white text-gray-800 border border-gray-200'
+                            }`}
+                          >
+                            {message.content}
+                          </div>
+                          <div className="text-xs text-gray-500 mt-1">
+                            {new Date(message.timestamp).toLocaleTimeString()}
+                          </div>
+                        </div>
+                      ))
+                    )}
+                    <div ref={messagesEndRef} />
+                  </div>
+
+                  {/* Quick prompts */}
+                  <div className="p-2 border-t border-b flex gap-2 overflow-x-auto scrollbar-thin scrollbar-thumb-gray-300">
+                    {quickPrompts.map((prompt) => (
+                      <button
+                        key={prompt.id}
+                        onClick={() => {
+                          if (prompt.id === 'guided') {
+                            setShowGuidedCreation(true);
+                          } else {
+                            setInputValue(prompt.prompt);
+                          }
+                        }}
+                        className="px-3 py-1 text-sm bg-gray-100 hover:bg-gray-200 rounded-full text-gray-700 whitespace-nowrap transition-all duration-200 hover:shadow-sm"
+                      >
+                        {prompt.text}
+                      </button>
+                    ))}
+                  </div>
+
+                  {/* Knowledge fragment search */}
+                  <div className="p-2 border-b">
+                    <input
+                      type="text"
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                      className="w-full px-3 py-2 text-sm border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200"
+                      placeholder="搜索灵感碎片..."
+                    />
+                    
+                    {searchResults.length > 0 && (
+                      <div className="mt-2 max-h-20 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300">
+                        {searchResults.map((fragment) => (
+                          <div 
+                            key={fragment.id}
+                            className={`p-2 text-xs rounded cursor-pointer mb-1 transition-all duration-200 ${
+                              selectedFragments.includes(fragment.id)
+                                ? 'bg-blue-100 border border-blue-300'
+                                : 'bg-gray-100 hover:bg-gray-200'
+                            }`}
+                            onClick={() => toggleFragmentSelection(fragment.id)}
+                          >
+                            <div className="font-medium">{fragment.title}</div>
+                            <div className="truncate">{fragment.content}</div>
+                          </div>
+                        ))}
+                      </div>
                     )}
                   </div>
-                ) : (
-                  <>
-                    {/* Messages area */}
-                    <div className="h-60 overflow-y-auto p-3 bg-gray-50 scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100">
-                      {messages.length === 0 ? (
-                        <div className="text-center py-6 text-gray-500">
-                          <p>你好，我是你的剧本创作助手！</p>
-                          <p className="text-sm mt-2">有什么可以帮助你的？</p>
-                        </div>
-                      ) : (
-                        messages.map((message) => (
-                          <div 
-                            key={message.id} 
-                            className={`mb-3 ${message.role === 'user' ? 'text-right' : ''}`}
-                          >
-                            <div 
-                              className={`inline-block px-3 py-2 rounded-lg max-w-[80%] shadow-sm ${
-                                message.role === 'user' 
-                                  ? 'bg-blue-600 text-white' 
-                                  : 'bg-white text-gray-800 border border-gray-200'
-                              }`}
-                            >
-                              {message.content}
-                            </div>
-                            <div className="text-xs text-gray-500 mt-1">
-                              {new Date(message.timestamp).toLocaleTimeString()}
-                            </div>
-                          </div>
-                        ))
-                      )}
-                      <div ref={messagesEndRef} />
-                    </div>
 
-                    {/* Quick prompts */}
-                    <div className="p-2 border-t border-b flex gap-2 overflow-x-auto scrollbar-thin scrollbar-thumb-gray-300">
-                      {quickPrompts.map((prompt) => (
-                        <button
-                          key={prompt.id}
-                          onClick={() => {
-                            if (prompt.id === 'guided') {
-                              setShowGuidedCreation(true);
-                            } else {
-                              setInputValue(prompt.prompt);
-                            }
-                          }}
-                          className="px-3 py-1 text-sm bg-gray-100 hover:bg-gray-200 rounded-full text-gray-700 whitespace-nowrap transition-all duration-200 hover:shadow-sm"
-                        >
-                          {prompt.text}
-                        </button>
-                      ))}
-                    </div>
-
-                    {/* Knowledge fragment search */}
-                    <div className="p-2 border-b">
+                  {/* Input area */}
+                  <form onSubmit={handleSendMessage} className="p-2 flex items-center bg-white">
+                    <div className="flex-1 relative">
                       <input
                         type="text"
-                        value={searchQuery}
-                        onChange={(e) => setSearchQuery(e.target.value)}
-                        className="w-full px-3 py-2 text-sm border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200"
-                        placeholder="搜索灵感碎片..."
+                        value={inputValue}
+                        onChange={(e) => setInputValue(e.target.value)}
+                        className="w-full px-4 py-3 pr-12 border rounded-l-md focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200 bg-gray-50 placeholder-gray-400 pulse-on-hover"
+                        placeholder="输入你的问题或要求..."
                       />
-                      
-                      {searchResults.length > 0 && (
-                        <div className="mt-2 max-h-20 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300">
-                          {searchResults.map((fragment) => (
-                            <div 
-                              key={fragment.id}
-                              className={`p-2 text-xs rounded cursor-pointer mb-1 transition-all duration-200 ${
-                                selectedFragments.includes(fragment.id)
-                                  ? 'bg-blue-100 border border-blue-300'
-                                  : 'bg-gray-100 hover:bg-gray-200'
-                              }`}
-                              onClick={() => toggleFragmentSelection(fragment.id)}
-                            >
-                              <div className="font-medium">{fragment.title}</div>
-                              <div className="truncate">{fragment.content}</div>
-                            </div>
-                          ))}
-                        </div>
-                      )}
+                      <span className="absolute right-3 top-1/2 transform -translate-y-1/2 text-lg text-gray-400">🔍</span>
                     </div>
-
-                    {/* Input area */}
-                    <form onSubmit={handleSendMessage} className="p-2 flex items-center bg-white">
-                      <div className="flex-1 relative">
-                        <input
-                          type="text"
-                          value={inputValue}
-                          onChange={(e) => setInputValue(e.target.value)}
-                          className="w-full px-4 py-3 pr-12 border rounded-l-md focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200 bg-gray-50 placeholder-gray-400 pulse-on-hover"
-                          placeholder="输入你的问题或要求..."
-                        />
-                        <span className="absolute right-3 top-1/2 transform -translate-y-1/2 text-lg text-gray-400">🔍</span>
-                      </div>
-                      <button
-                        type="submit"
-                        className="px-5 py-3 bg-blue-600 text-white rounded-r-md hover:bg-blue-700 disabled:bg-gray-400 transition-all duration-200 hover:shadow-md flex items-center justify-center"
-                        disabled={!inputValue.trim()}
-                      >
-                        <span>发送</span>
-                      </button>
-                    </form>
-                  </>
-                )}
-              </>
-            )}
-          </div>
+                    <button
+                      type="submit"
+                      className="px-5 py-3 bg-blue-600 text-white rounded-r-md hover:bg-blue-700 disabled:bg-gray-400 transition-all duration-200 hover:shadow-md flex items-center justify-center"
+                      disabled={!inputValue.trim()}
+                    >
+                      <span>发送</span>
+                    </button>
+                  </form>
+                </>
+              )}
+            </>
+          )}
         </div>
-      )}
+      </div>
     </>
   );
 }
