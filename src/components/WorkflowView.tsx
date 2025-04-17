@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useScriptContext } from '../context/ScriptContext';
 import { WorkflowStep } from '../types';
 
@@ -64,6 +64,9 @@ export default function WorkflowView() {
   const generateNextStepContent = (targetStepId: WorkflowStep) => {
     const currentStepId = currentScript.currentStep;
     
+    // 始终保存当前内容，确保切换步骤时不会丢失
+    const updatedScript = { ...currentScript };
+    
     // 如果从大纲到人物设定，基于大纲提取可能的角色
     if (currentStepId === 'outline' && targetStepId === 'characters') {
       // 这里简单实现从大纲中提取@标记的角色名
@@ -78,11 +81,9 @@ export default function WorkflowView() {
       
       // 如果有提取到角色且当前没有角色，就添加到脚本中
       if (extractedCharacters.length > 0 && currentScript.characters.length === 0) {
-        updateScript({
-          ...currentScript,
-          characters: extractedCharacters,
-          currentStep: targetStepId
-        });
+        updatedScript.characters = extractedCharacters;
+        updatedScript.currentStep = targetStepId;
+        updateScript(updatedScript);
         return true;
       }
     }
@@ -110,11 +111,9 @@ export default function WorkflowView() {
             ]
           };
           
-          updateScript({
-            ...currentScript,
-            characters: updatedCharacters,
-            currentStep: targetStepId
-          });
+          updatedScript.characters = updatedCharacters;
+          updatedScript.currentStep = targetStepId;
+          updateScript(updatedScript);
           return true;
         }
       }
@@ -132,40 +131,38 @@ export default function WorkflowView() {
         order: 0
       };
       
-      updateScript({
-        ...currentScript,
-        scenes: [newScene],
-        currentStep: targetStepId
-      });
+      updatedScript.scenes = [newScene];
+      updatedScript.currentStep = targetStepId;
+      updateScript(updatedScript);
       return true;
     }
     
     // 如果从分幕到初稿，但初稿为空
     if (currentStepId === 'scenes' && targetStepId === 'draft') {
       // 基于现有场景生成初稿框架
-      const draftSections = currentScript.scenes.map(scene => 
-        `## ${scene.title}\n\n${scene.description}\n\n参与角色：${
-          scene.characters.map(charId => {
-            const character = currentScript.characters.find(c => c.id === charId);
-            return character ? character.name : '未知角色';
-          }).join('、')
-        }\n\n${scene.content}\n\n---\n\n`
-      ).join('');
+      const draftSections = currentScript.scenes
+        .sort((a, b) => a.order - b.order)
+        .map(scene => 
+          `## ${scene.title}\n\n${scene.description}\n\n参与角色：${
+            scene.characters.map(charId => {
+              const character = currentScript.characters.find(c => c.id === charId);
+              return character ? character.name : '未知角色';
+            }).join('、')
+          }\n\n${scene.content}\n\n---\n\n`
+        ).join('');
       
       const fullDraft = `# ${currentScript.title} - 初稿\n\n${draftSections}`;
       
-      // 这里我们假设outline字段可以存储初稿内容
-      // 在实际应用中，你可能想要添加一个专门的draft字段到Script类型
-      updateScript({
-        ...currentScript,
-        outline: fullDraft, // 将大纲更新为生成的初稿内容
-        currentStep: targetStepId
-      });
+      // 更新脚本内容
+      updatedScript.outline = fullDraft;
+      updatedScript.currentStep = targetStepId;
+      updateScript(updatedScript);
       return true;
     }
     
-    // 默认只更新步骤状态
-    setWorkflowStep(targetStepId);
+    // 默认更新步骤状态
+    updatedScript.currentStep = targetStepId;
+    updateScript(updatedScript);
     return false;
   };
 

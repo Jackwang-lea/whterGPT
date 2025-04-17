@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useScriptContext } from '../context/ScriptContext';
 
 export default function ScriptEditor() {
@@ -15,18 +15,54 @@ export default function ScriptEditor() {
     }
   }, [currentScript]);
 
+  const saveContent = useCallback(() => {
+    if (!currentScript || content === lastSavedContent) return;
+    
+    updateOutline(content);
+    setLastSavedContent(content);
+    showSaveSuccess();
+    saveEditPosition({
+      cursorPosition: document.activeElement instanceof HTMLTextAreaElement 
+        ? document.activeElement.selectionStart 
+        : undefined
+    });
+  }, [content, currentScript, lastSavedContent, updateOutline, saveEditPosition]);
+
   // 自动保存功能 - 当内容改变且停止输入1秒后自动保存
   useEffect(() => {
     if (!currentScript || content === lastSavedContent) return;
     
     const saveTimer = setTimeout(() => {
-      updateOutline(content);
-      setLastSavedContent(content);
-      showSaveSuccess();
+      saveContent();
     }, 1000);
     
     return () => clearTimeout(saveTimer);
-  }, [content, currentScript, lastSavedContent, updateOutline]);
+  }, [content, currentScript, lastSavedContent, saveContent]);
+
+  // 添加页面卸载前保存
+  useEffect(() => {
+    // 在组件卸载前保存
+    return () => {
+      if (content !== lastSavedContent) {
+        updateOutline(content);
+      }
+    };
+  }, [content, lastSavedContent, updateOutline]);
+
+  // 添加路由切换前保存
+  useEffect(() => {
+    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+      if (content !== lastSavedContent) {
+        // 在页面关闭/刷新前保存
+        updateOutline(content);
+      }
+    };
+    
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    return () => {
+      window.removeEventListener('beforeunload', handleBeforeUnload);
+    };
+  }, [content, lastSavedContent, updateOutline]);
 
   const showSaveSuccess = () => {
     setShowSaveNotification(true);
@@ -48,14 +84,7 @@ export default function ScriptEditor() {
   };
 
   const handleSave = () => {
-    updateOutline(content);
-    setLastSavedContent(content);
-    showSaveSuccess();
-    saveEditPosition({
-      cursorPosition: document.activeElement instanceof HTMLTextAreaElement 
-        ? document.activeElement.selectionStart 
-        : undefined
-    });
+    saveContent();
   };
 
   // Function to highlight character references (@CharacterName)
@@ -103,7 +132,13 @@ export default function ScriptEditor() {
             {content !== lastSavedContent ? '编辑中...' : '已保存'}
           </span>
           <button
-            onClick={() => setIsEditing(!isEditing)}
+            onClick={() => {
+              // 切换到预览之前先保存
+              if (isEditing && content !== lastSavedContent) {
+                saveContent();
+              }
+              setIsEditing(!isEditing);
+            }}
             className="px-3 py-1 text-sm border rounded-md text-gray-600 hover:bg-gray-50"
           >
             {isEditing ? '预览' : '编辑'}
