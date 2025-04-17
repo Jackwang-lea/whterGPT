@@ -32,7 +32,7 @@
 
 1. 克隆仓库
 ```bash
-git clone https://github.com/your-username/whterGPT.git
+gcl git@github.com:Jackwang-lea/whterGPT.git
 cd whterGPT
 ```
 
