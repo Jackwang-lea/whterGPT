@@ -1,54 +1,71 @@
-# React + TypeScript + Vite
+# 剧本杀创作工具 🎭
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+<div align="center">
+  <img src="https://img.shields.io/badge/React-18-blue?logo=react" alt="React 18" />
+  <img src="https://img.shields.io/badge/TypeScript-5-blue?logo=typescript" alt="TypeScript 5" />
+  <img src="https://img.shields.io/badge/Vite-latest-646CFF?logo=vite" alt="Vite" />
+  <img src="https://img.shields.io/badge/Tailwind_CSS-latest-38B2AC?logo=tailwind-css" alt="Tailwind CSS" />
+  <img src="https://img.shields.io/badge/License-MIT-green" alt="MIT License" />
+</div>
 
-Currently, two official plugins are available:
+## 📝 项目介绍
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+剧本杀创作工具是一个专为剧本杀爱好者和创作者设计的一站式创作平台。通过结构化的创作流程、智能辅助功能和可视化工具，帮助创作者更高效地完成剧本创作，从构思到最终成稿的全过程都能得到支持。
 
-## Expanding the ESLint configuration
+## ✨ 核心功能
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+- **项目管理** - 方便地创建、管理多个剧本项目
+- **引导式创作流程** - 从大纲、人物设定、关系构建到场景设计的完整工作流
+- **人物关系管理** - 可视化的人物关系编辑和管理
+- **场景分镜** - 直观的剧本场景规划与管理
+- **Copilot创作助手** - AI辅助的创作建议和内容生成
+- **知识库** - 剧本创作资料的收集与管理
 
-```js
-export default tseslint.config({
-  extends: [
-    // Remove ...tseslint.configs.recommended and replace with this
-    ...tseslint.configs.recommendedTypeChecked,
-    // Alternatively, use this for stricter rules
-    ...tseslint.configs.strictTypeChecked,
-    // Optionally, add this for stylistic rules
-    ...tseslint.configs.stylisticTypeChecked,
-  ],
-  languageOptions: {
-    // other options...
-    parserOptions: {
-      project: ['./tsconfig.node.json', './tsconfig.app.json'],
-      tsconfigRootDir: import.meta.dirname,
-    },
-  },
-})
+## 🚀 快速开始
+
+### 环境要求
+
+- Node.js 18.0 或更高版本
+- npm 8.0 或更高版本
+
+### 安装步骤
+
+1. 克隆仓库
+```bash
+git clone https://github.com/your-username/whterGPT.git
+cd whterGPT
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
-
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
-
-export default tseslint.config({
-  plugins: {
-    // Add the react-x and react-dom plugins
-    'react-x': reactX,
-    'react-dom': reactDom,
-  },
-  rules: {
-    // other rules...
-    // Enable its recommended typescript rules
-    ...reactX.configs['recommended-typescript'].rules,
-    ...reactDom.configs.recommended.rules,
-  },
-})
+2. 安装依赖
+```bash
+npm install
 ```
+
+3. 启动开发服务器
+```bash
+npm run dev
+```
+
+4. 构建项目
+```bash
+npm run build
+```
+
+## 🔧 技术栈
+
+- **前端框架**: React 18
+- **语言**: TypeScript
+- **构建工具**: Vite
+- **样式**: Tailwind CSS
+- **路由**: React Router
+- **状态管理**: React Context API
+
+## 📷 项目截图
+
+(项目截图将在这里展示)
+
+---
+
+<div align="center">
+  <sub>Made with ❤️ for mystery game creators</sub>
+</div>
