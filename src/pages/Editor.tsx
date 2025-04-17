@@ -5,7 +5,6 @@ import Layout from '../components/Layout';
 import ScriptEditor from '../components/ScriptEditor';
 import WorkflowView from '../components/WorkflowView';
 import CharacterManager from '../components/CharacterManager';
-import Copilot from '../components/Copilot';
 import SceneManager from '../components/SceneManager';
 import DraftGenerator from '../components/DraftGenerator';
 
@@ -63,7 +62,6 @@ export default function Editor() {
           {renderEditorComponent()}
         </div>
       </div>
-      <Copilot />
     </Layout>
   );
 } 

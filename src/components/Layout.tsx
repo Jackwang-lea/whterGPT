@@ -1,5 +1,6 @@
 import { ReactNode } from 'react';
 import { Link, useLocation } from 'react-router-dom';
+import Copilot from './Copilot';
 
 interface LayoutProps {
   children: ReactNode;
@@ -40,6 +41,8 @@ export default function Layout({ children }: LayoutProps) {
       <main className="flex-1 overflow-auto">
         {children}
       </main>
+      
+      <Copilot />
     </div>
   );
 } 
