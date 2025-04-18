@@ -2,6 +2,8 @@ import { useState, useRef, useEffect } from 'react';
 import { useCopilotContext } from '../context/CopilotContext';
 import { useScriptContext } from '../context/ScriptContext';
 import { KnowledgeFragment, WorkflowStep } from '../types';
+import GeminiService from '../services/GeminiService';
+import RagService from '../services/RagService';
 
 // 添加全局样式
 const addGlobalStyles = () => {
@@ -107,6 +109,10 @@ export default function Copilot() {
   
   // 控制Copilot的显示状态 - 默认隐藏
   const [isVisible, setIsVisible] = useState(false);
+
+  // Gemini和RAG状态
+  const [isAiProcessing, setIsAiProcessing] = useState(false);
+  const [aiModel, setAiModel] = useState<'rag' | 'gemini'>('rag');
 
   // 添加全局样式
   useEffect(() => {
@@ -294,13 +300,58 @@ export default function Copilot() {
     }
   }, [searchQuery, searchKnowledgeFragments]);
 
-  const handleSendMessage = (e: React.FormEvent) => {
+  // 初始化RAG知识库
+  useEffect(() => {
+    if (knowledgeFragments.length > 0) {
+      RagService.setKnowledgeBase(knowledgeFragments);
+    }
+  }, [knowledgeFragments]);
+
+  // 处理发送消息
+  const handleSendMessage = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (inputValue.trim()) {
-      sendMessage(inputValue, selectedFragments);
-      setInputValue('');
-      setSelectedFragments([]);
-      setSearchQuery('');
+    if (!inputValue.trim()) return;
+    
+    // 发送用户消息
+    sendMessage(inputValue, selectedFragments);
+    
+    // 准备AI回复
+    const userQuery = inputValue;
+    setInputValue('');
+    setSelectedFragments([]);
+    setSearchQuery('');
+    
+    // 设置AI处理状态
+    setIsAiProcessing(true);
+    
+    try {
+      // 根据所选模型生成回复
+      let aiResponse: string;
+      
+      if (selectedFragments.length > 0) {
+        // 如果用户选择了知识片段，使用RAG模式
+        const selectedDocs = selectedFragments.map(id => 
+          knowledgeFragments.find(frag => frag.id === id)
+        ).filter(Boolean) as KnowledgeFragment[];
+        
+        // 设置RAG的知识库为选定的片段
+        RagService.setKnowledgeBase(selectedDocs);
+        aiResponse = await RagService.answerQuery(userQuery);
+      } else if (aiModel === 'rag') {
+        // 使用完整知识库的RAG
+        aiResponse = await RagService.answerQuery(userQuery);
+      } else {
+        // 直接使用Gemini
+        aiResponse = await GeminiService.generateText(userQuery);
+      }
+      
+      // 发送AI回复
+      sendMessage(aiResponse, [], 'ai');
+    } catch (error) {
+      console.error('生成AI回复时出错:', error);
+      sendMessage('抱歉，我现在无法处理您的请求。请稍后再试。', [], 'ai');
+    } finally {
+      setIsAiProcessing(false);
     }
   };
 
@@ -341,55 +392,75 @@ export default function Copilot() {
     
     setIsGenerating(true);
     
-    // 生成大纲
-    setCurrentGenerationStep('outline');
-    setGenerationProgress(20);
-    await new Promise(r => setTimeout(r, 1500));
-    const outline = `# ${currentScript.title}\n\n## 故事背景\n${storyBackground}\n\n## 核心冲突\n根据角色背景衍生的核心冲突与矛盾`;
-    updateOutline(outline);
-    setWorkflowStep('outline');
-    
-    // 生成角色关系
-    setCurrentGenerationStep('relationships');
-    setGenerationProgress(40);
-    await new Promise(r => setTimeout(r, 1500));
-    
-    // 模拟添加角色
-    const characterLines = characterSettings.split('\n');
-    for (const line of characterLines) {
-      if (line.trim()) {
-        const charName = line.split(':')[0]?.trim() || '未命名角色';
-        addCharacter({
-          name: charName,
-          description: line,
-          background: `${charName}的背景故事`
-        });
+    try {
+      // 生成大纲
+      setCurrentGenerationStep('outline');
+      setGenerationProgress(20);
+      
+      // 使用Gemini优化大纲
+      const outlinePrompt = `创建一个剧本杀游戏大纲，标题为"${currentScript.title}"。
+背景设定: ${storyBackground}
+请提供完整的世界观、核心矛盾和主要情节。`;
+      
+      const outline = await GeminiService.generateText(outlinePrompt, 0.7, 2000);
+      updateOutline(outline);
+      setWorkflowStep('outline');
+      await new Promise(r => setTimeout(r, 500)); // 视觉延迟
+      
+      // 生成角色关系
+      setCurrentGenerationStep('relationships');
+      setGenerationProgress(40);
+      
+      // 解析角色设定并使用Gemini完善
+      const characterLines = characterSettings.split('\n');
+      for (const line of characterLines) {
+        if (line.trim()) {
+          try {
+            const charName = line.split(':')[0]?.trim() || '未命名角色';
+            const characterDetails = await GeminiService.createCharacter(line);
+            
+            addCharacter({
+              name: charName,
+              description: characterDetails.substring(0, 100) + '...',
+              background: characterDetails
+            });
+            
+            await new Promise(r => setTimeout(r, 300)); // 添加间隔
+          } catch (error) {
+            console.error('创建角色时出错:', error);
+          }
+        }
       }
+      
+      setWorkflowStep('relationships');
+      await new Promise(r => setTimeout(r, 500)); // 视觉延迟
+      
+      // 生成场景分幕
+      setCurrentGenerationStep('scenes');
+      setGenerationProgress(60);
+      await new Promise(r => setTimeout(r, 800));
+      setWorkflowStep('scenes');
+      
+      // 生成剧本初稿
+      setCurrentGenerationStep('draft');
+      setGenerationProgress(90);
+      await new Promise(r => setTimeout(r, 800));
+      setWorkflowStep('draft');
+      
+      // 完成所有生成
+      setGenerationProgress(100);
+      await new Promise(r => setTimeout(r, 500));
+    } catch (error) {
+      console.error('AI生成过程中出错:', error);
+      sendMessage('生成过程中发生错误，请稍后重试。', [], 'ai');
+    } finally {
+      // 重置状态
+      setIsGenerating(false);
+      setShowGuidedCreation(false);
+      
+      // 添加AI完成消息
+      sendMessage(`我已经根据您提供的故事背景和角色设定完成了初步的剧本框架构建。现在您可以点击各个工作流步骤来查看和编辑内容，我会持续为您提供创作建议和辅助。需要任何帮助，请随时向我提问。`, [], 'ai');
     }
-    setWorkflowStep('relationships');
-    
-    // 生成场景分幕
-    setCurrentGenerationStep('scenes');
-    setGenerationProgress(60);
-    await new Promise(r => setTimeout(r, 1500));
-    setWorkflowStep('scenes');
-    
-    // 生成剧本初稿
-    setCurrentGenerationStep('draft');
-    setGenerationProgress(90);
-    await new Promise(r => setTimeout(r, 1500));
-    setWorkflowStep('draft');
-    
-    // 完成所有生成
-    setGenerationProgress(100);
-    await new Promise(r => setTimeout(r, 500));
-    
-    // 重置状态
-    setIsGenerating(false);
-    setShowGuidedCreation(false);
-    
-    // 添加AI消息
-    sendMessage(`我已经根据您提供的故事背景和角色设定完成了初步的剧本框架构建。现在您可以点击各个工作流步骤来查看和编辑内容，我会持续为您提供创作建议和辅助。需要任何帮助，请随时向我提问。`);
   };
 
   debugLog('渲染Copilot组件', { isVisible, isExpanded });
@@ -549,7 +620,7 @@ export default function Copilot() {
                     {messages.length === 0 ? (
                       <div className="text-center py-6 text-gray-500">
                         <p>你好，我是你的剧本创作助手！</p>
-                        <p className="text-sm mt-2">有什么可以帮助你的？</p>
+                        <p className="text-sm mt-2">我使用Gemini AI提供支持，有什么可以帮助你的？</p>
                       </div>
                     ) : (
                       messages.map((message) => (
@@ -572,7 +643,48 @@ export default function Copilot() {
                         </div>
                       ))
                     )}
+                    {isAiProcessing && (
+                      <div className="text-left mb-3">
+                        <div className="inline-block px-4 py-2 rounded-lg bg-white border border-gray-200 text-gray-800">
+                          <div className="flex items-center space-x-2">
+                            <div className="flex space-x-1">
+                              <div className="w-2 h-2 rounded-full bg-blue-600 animate-bounce" style={{ animationDelay: '0ms' }}></div>
+                              <div className="w-2 h-2 rounded-full bg-blue-600 animate-bounce" style={{ animationDelay: '150ms' }}></div>
+                              <div className="w-2 h-2 rounded-full bg-blue-600 animate-bounce" style={{ animationDelay: '300ms' }}></div>
+                            </div>
+                            <span className="text-sm text-gray-600">思考中...</span>
+                          </div>
+                        </div>
+                      </div>
+                    )}
                     <div ref={messagesEndRef} />
+                  </div>
+
+                  {/* 模型选择 */}
+                  <div className="px-2 py-1 border-t flex justify-center">
+                    <div className="flex items-center space-x-2 text-sm">
+                      <span className="text-gray-600">模型:</span>
+                      <button 
+                        className={`px-2 py-1 rounded-md transition-colors ${
+                          aiModel === 'rag' 
+                            ? 'bg-blue-100 text-blue-800 font-medium' 
+                            : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                        }`}
+                        onClick={() => setAiModel('rag')}
+                      >
+                        RAG知识库
+                      </button>
+                      <button 
+                        className={`px-2 py-1 rounded-md transition-colors ${
+                          aiModel === 'gemini' 
+                            ? 'bg-blue-100 text-blue-800 font-medium' 
+                            : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                        }`}
+                        onClick={() => setAiModel('gemini')}
+                      >
+                        Gemini
+                      </button>
+                    </div>
                   </div>
 
                   {/* Quick prompts */}
@@ -633,15 +745,16 @@ export default function Copilot() {
                         onChange={(e) => setInputValue(e.target.value)}
                         className="w-full px-4 py-3 pr-12 border rounded-l-md focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200 bg-gray-50 placeholder-gray-400 pulse-on-hover"
                         placeholder="输入你的问题或要求..."
+                        disabled={isAiProcessing}
                       />
                       <span className="absolute right-3 top-1/2 transform -translate-y-1/2 text-lg text-gray-400">🔍</span>
                     </div>
                     <button
                       type="submit"
                       className="px-5 py-3 bg-blue-600 text-white rounded-r-md hover:bg-blue-700 disabled:bg-gray-400 transition-all duration-200 hover:shadow-md flex items-center justify-center"
-                      disabled={!inputValue.trim()}
+                      disabled={!inputValue.trim() || isAiProcessing}
                     >
-                      <span>发送</span>
+                      <span>{isAiProcessing ? '处理中' : '发送'}</span>
                     </button>
                   </form>
                 </>

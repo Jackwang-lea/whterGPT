@@ -1,24 +1,104 @@
-import { createContext, useContext, useState, ReactNode } from 'react';
-import { KnowledgeFragment } from '../types';
+import React, { createContext, useContext, useState, ReactNode } from 'react';
+import { v4 as uuidv4 } from 'uuid';
+import { KnowledgeFragment, CopilotMessage } from '../types';
 
-interface Message {
-  id: string;
-  content: string;
-  role: 'user' | 'assistant';
-  timestamp: Date;
-  referencedFragments?: string[]; // IDs of referenced knowledge fragments
-}
+// 模拟知识片段数据
+const mockKnowledgeFragments: KnowledgeFragment[] = [
+  {
+    id: 'k1',
+    title: '场景设计原则',
+    content: '一个好的场景设计应该包含明确的目的、情感氛围和至少一个冲突点。',
+    tags: ['场景', '设计', '剧本'],
+    source: '剧本创作指南',
+    createdAt: Date.now() - 86400000 * 2, // 2天前
+  },
+  {
+    id: 'k2',
+    title: '角色弧光',
+    content: '角色弧光是指角色在故事中的成长和变化。一个有深度的角色应该在故事结束时与开始时有所不同。',
+    tags: ['角色', '弧光', '发展'],
+    source: '人物塑造技巧',
+    createdAt: Date.now() - 86400000, // 1天前
+  },
+  {
+    id: 'k3',
+    title: '悬疑剧本结构',
+    content: '悬疑剧本通常有一个扣人心弦的开场、逐渐展开的线索和出人意料但合理的结局。',
+    tags: ['悬疑', '结构', '剧本'],
+    source: '悬疑写作指南',
+    createdAt: Date.now(), // 今天
+  },
+];
 
 interface CopilotContextType {
-  messages: Message[];
+  messages: CopilotMessage[];
+  sendMessage: (content: string, fragmentIds?: string[], role?: 'user' | 'ai') => void;
+  clearMessages: () => void;
+  generateDraft: (prompt: string) => Promise<string>;
   knowledgeFragments: KnowledgeFragment[];
-  sendMessage: (content: string, referencedFragments?: string[]) => void;
-  generateDraft: (prompt: string) => void;
-  uploadKnowledgeFragment: (title: string, content: string, source: string, tags: string[]) => void;
   searchKnowledgeFragments: (query: string) => KnowledgeFragment[];
 }
 
-const CopilotContext = createContext<CopilotContextType | undefined>(undefined);
+const CopilotContext = createContext<CopilotContextType | null>(null);
+
+export const CopilotProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
+  const [messages, setMessages] = useState<CopilotMessage[]>([]);
+  const [knowledgeFragments] = useState<KnowledgeFragment[]>(mockKnowledgeFragments);
+
+  // 发送消息
+  const sendMessage = (content: string, fragmentIds: string[] = [], role: 'user' | 'ai' = 'user') => {
+    const newMessage: CopilotMessage = {
+      id: uuidv4(),
+      content,
+      role,
+      timestamp: Date.now(),
+      fragmentIds,
+    };
+    
+    setMessages((prevMessages) => [...prevMessages, newMessage]);
+  };
+
+  // 清空消息
+  const clearMessages = () => {
+    setMessages([]);
+  };
+
+  // 生成草稿
+  const generateDraft = async (prompt: string): Promise<string> => {
+    // 模拟AI生成过程
+    await new Promise((resolve) => setTimeout(resolve, 1500));
+    return `基于提示"${prompt}"生成的草稿内容...`;
+  };
+
+  // 搜索知识片段
+  const searchKnowledgeFragments = (query: string): KnowledgeFragment[] => {
+    if (!query.trim()) return [];
+    
+    const lowerQuery = query.toLowerCase();
+    return knowledgeFragments.filter((fragment) => {
+      return (
+        fragment.title.toLowerCase().includes(lowerQuery) ||
+        fragment.content.toLowerCase().includes(lowerQuery) ||
+        fragment.tags.some((tag) => tag.toLowerCase().includes(lowerQuery))
+      );
+    });
+  };
+
+  return (
+    <CopilotContext.Provider
+      value={{
+        messages,
+        sendMessage,
+        clearMessages,
+        generateDraft,
+        knowledgeFragments,
+        searchKnowledgeFragments,
+      }}
+    >
+      {children}
+    </CopilotContext.Provider>
+  );
+};
 
 export const useCopilotContext = () => {
   const context = useContext(CopilotContext);
@@ -26,91 +106,4 @@ export const useCopilotContext = () => {
     throw new Error('useCopilotContext must be used within a CopilotProvider');
   }
   return context;
-};
-
-export const CopilotProvider = ({ children }: { children: ReactNode }) => {
-  const [messages, setMessages] = useState<Message[]>([]);
-  const [knowledgeFragments, setKnowledgeFragments] = useState<KnowledgeFragment[]>([]);
-
-  // In a real app, this would interact with an API
-  const mockAssistantResponse = (userMessage: string): string => {
-    const responses = [
-      "I can help you develop that character further. What aspects are you struggling with?",
-      "That's an interesting plot twist. Consider how it might affect the relationships between characters.",
-      "For this scene, you might want to build more tension before the reveal.",
-      "I've analyzed your script and found some inconsistencies in character motivations.",
-      "Based on your outline, here's a draft for the confrontation scene you requested.",
-    ];
-    
-    return responses[Math.floor(Math.random() * responses.length)];
-  };
-
-  const sendMessage = (content: string, referencedFragments: string[] = []) => {
-    // Add user message
-    const userMessage: Message = {
-      id: crypto.randomUUID(),
-      content,
-      role: 'user',
-      timestamp: new Date(),
-      referencedFragments,
-    };
-    
-    setMessages(prevMessages => [...prevMessages, userMessage]);
-    
-    // Simulate AI response
-    setTimeout(() => {
-      const assistantResponse = mockAssistantResponse(content);
-      const assistantMessage: Message = {
-        id: crypto.randomUUID(),
-        content: assistantResponse,
-        role: 'assistant',
-        timestamp: new Date(),
-      };
-      
-      setMessages(prevMessages => [...prevMessages, assistantMessage]);
-    }, 1000);
-  };
-
-  const generateDraft = (prompt: string) => {
-    // In a real app, this would call an API with more sophisticated AI
-    sendMessage(`[DRAFT REQUEST] ${prompt}`);
-  };
-
-  const uploadKnowledgeFragment = (title: string, content: string, source: string, tags: string[]) => {
-    const newFragment: KnowledgeFragment = {
-      id: crypto.randomUUID(),
-      title,
-      content,
-      tags,
-      source,
-      createdAt: new Date(),
-    };
-    
-    setKnowledgeFragments([...knowledgeFragments, newFragment]);
-  };
-
-  const searchKnowledgeFragments = (query: string): KnowledgeFragment[] => {
-    // Basic search implementation
-    const lowerQuery = query.toLowerCase();
-    return knowledgeFragments.filter(fragment => 
-      fragment.title.toLowerCase().includes(lowerQuery) || 
-      fragment.content.toLowerCase().includes(lowerQuery) ||
-      fragment.tags.some(tag => tag.toLowerCase().includes(lowerQuery))
-    );
-  };
-
-  const value = {
-    messages,
-    knowledgeFragments,
-    sendMessage,
-    generateDraft,
-    uploadKnowledgeFragment,
-    searchKnowledgeFragments,
-  };
-
-  return (
-    <CopilotContext.Provider value={value}>
-      {children}
-    </CopilotContext.Provider>
-  );
 }; 
