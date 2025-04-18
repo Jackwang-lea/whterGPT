@@ -61,7 +61,8 @@ npm run build
 
 ## 📷 项目截图
 
-(项目截图将在这里展示)
+<img width="1440" alt="截屏2025-04-18 19 38 27" src="https://github.com/user-attachments/assets/cdf9b3ee-e218-4d8b-8d05-2934b0e02fff" />
+
 
 ---
 
