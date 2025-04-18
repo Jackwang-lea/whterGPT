@@ -65,10 +65,10 @@ export default function CharacterManager() {
     
     const updatedCharacter = {
       ...editingCharacter,
-      relationships: [
-        ...editingCharacter.relationships,
-        newRelationship
-      ]
+      relationships: {
+        ...editingCharacter.relationships || {},
+        [newRelationship.targetId]: newRelationship.description || newRelationship.type
+      }
     };
     
     setEditingCharacter(updatedCharacter);
@@ -83,8 +83,11 @@ export default function CharacterManager() {
   const handleUpdateRelationship = () => {
     if (!editingCharacter || !editingRelationship) return;
     
-    const updatedRelationships = [...editingCharacter.relationships];
-    updatedRelationships[editingRelationship.index] = editingRelationship.relationship;
+    const updatedRelationships = { 
+      ...editingCharacter.relationships || {}
+    };
+    updatedRelationships[editingRelationship.relationship.targetId] = 
+      editingRelationship.relationship.description || editingRelationship.relationship.type;
     
     setEditingCharacter({
       ...editingCharacter,
@@ -95,9 +98,13 @@ export default function CharacterManager() {
   };
 
   const handleRemoveRelationship = (index: number) => {
-    if (!editingCharacter) return;
+    if (!editingCharacter || !editingCharacter.relationships) return;
     
-    const updatedRelationships = editingCharacter.relationships.filter((_, i) => i !== index);
+    const relationshipEntries = Object.entries(editingCharacter.relationships);
+    const keyToRemove = relationshipEntries[index][0];
+    
+    const updatedRelationships = { ...editingCharacter.relationships };
+    delete updatedRelationships[keyToRemove];
     
     setEditingCharacter({
       ...editingCharacter,
@@ -441,17 +448,17 @@ export default function CharacterManager() {
                 {/* 现有关系列表 */}
                 {!editingRelationship && (
                   <div className="mt-3">
-                    {editingCharacter.relationships.length > 0 ? (
+                    {editingCharacter.relationships && Object.entries(editingCharacter.relationships).length > 0 ? (
                       <ul className="space-y-2">
-                        {editingCharacter.relationships.map((relationship, index) => {
-                          const targetCharacter = currentScript.characters.find(c => c.id === relationship.targetId);
+                        {Object.entries(editingCharacter.relationships).map(([targetId, description], index) => {
+                          const targetCharacter = currentScript.characters.find(c => c.id === targetId);
                           return (
-                            <li key={index} className="p-2 border rounded bg-gray-50 relative group">
+                            <li key={targetId} className="p-2 border rounded bg-gray-50 relative group">
                               <div className="font-medium">
                                 与 <span className="text-blue-600">{targetCharacter?.name || '未知角色'}</span> 的关系
                               </div>
-                              <div className="text-sm">类型: {relationship.type}</div>
-                              <div className="text-sm">{relationship.description}</div>
+                              <div className="text-sm">类型: {targetId === description ? '自定义' : description}</div>
+                              <div className="text-sm">{targetId === description ? description : ''}</div>
                               
                               {/* 操作按钮，鼠标悬停时显示 */}
                               <div className="absolute top-2 right-2 hidden group-hover:flex gap-1">
@@ -460,7 +467,11 @@ export default function CharacterManager() {
                                     e.stopPropagation();
                                     setEditingRelationship({
                                       index,
-                                      relationship: { ...relationship }
+                                      relationship: {
+                                        targetId,
+                                        type: targetId === description ? '自定义' : description,
+                                        description: targetId === description ? description : ''
+                                      }
                                     });
                                     setShowAddRelationshipForm(false);
                                   }}

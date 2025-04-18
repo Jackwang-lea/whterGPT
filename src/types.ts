@@ -23,6 +23,13 @@ export interface Character {
   relationships?: Record<string, string>; // characterId -> relationship description
 }
 
+export interface Relationship {
+  source: string; // character id
+  target: string; // character id
+  description: string;
+  type: string; // 关系类型，如"朋友"、"敌人"等
+}
+
 export interface Scene {
   id: string;
   title: string;
