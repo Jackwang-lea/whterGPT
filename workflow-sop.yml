@@ -1,0 +1,244 @@
+# 剧本杀创作工具 - 工作流程标准操作程序 (SOP)
+# 版本: 0.0.1
+# 创建日期: 2025-04-18
+
+name: 剧本杀创作工具
+description: 通过结构化的工作流程指导剧本杀创作，实现步骤间的联动与同步
+
+# 工作流程核心步骤定义
+workflow_steps:
+  - id: outline
+    name: 大纲构思
+    description: 确定剧本主题、世界观、核心矛盾和主要情节
+    order: 1
+    required: true
+    outputs:
+      - title
+      - theme
+      - background
+      - core_conflict
+      - main_plot
+    ui_components:
+      - component: OutlineEditor
+        default: true
+      - component: MindMap
+        optional: true
+    
+  - id: characters
+    name: 人物设定
+    description: 创建角色、设定角色背景与人设
+    order: 2
+    required: true
+    outputs:
+      - character_list
+    dependencies:
+      - outline.theme
+      - outline.background
+    ui_components:
+      - component: CharacterEditor
+        default: true
+  
+  - id: relationships
+    name: 人物关系
+    description: 建立角色间的关系网络
+    order: 3
+    required: true
+    outputs:
+      - relationship_graph
+    dependencies:
+      - characters.character_list
+    ui_components:
+      - component: RelationshipGraph
+        default: true
+  
+  - id: clues
+    name: 线索设计
+    description: 设计关键线索、证据和信息点
+    order: 4
+    required: true
+    outputs:
+      - clue_list
+    dependencies:
+      - outline.main_plot
+      - characters.character_list
+      - relationships.relationship_graph
+    ui_components:
+      - component: ClueManager
+        default: true
+      - component: ClueTimeline
+        optional: true
+  
+  - id: scenes
+    name: 场景分幕
+    description: 规划场景、剧情分幕和角色分配
+    order: 5
+    required: true
+    outputs:
+      - scene_list
+    dependencies:
+      - outline.main_plot
+      - characters.character_list
+      - clues.clue_list
+    ui_components:
+      - component: SceneManager
+        default: true
+  
+  - id: draft
+    name: 剧本初稿
+    description: 撰写完整剧本初稿
+    order: 6
+    required: true
+    outputs:
+      - script_draft
+    dependencies:
+      - outline.main_plot
+      - characters.character_list
+      - relationships.relationship_graph
+      - clues.clue_list
+      - scenes.scene_list
+    ui_components:
+      - component: ScriptEditor
+        default: true
+  
+  - id: refinement
+    name: 润色完善
+    description: 润色剧本、平衡游戏性、完善细节
+    order: 7
+    required: false
+    outputs:
+      - final_script
+    dependencies:
+      - draft.script_draft
+    ui_components:
+      - component: ScriptEditor
+        default: true
+      - component: GameplayBalancer
+        optional: true
+
+# 联动关系定义
+sync_rules:
+  - trigger: 
+      step: characters
+      action: create
+    effects:
+      - target: relationships
+        action: update_graph
+        description: 当创建新角色时，更新人物关系图
+      
+  - trigger:
+      step: characters
+      action: update
+    effects:
+      - target: relationships
+        action: update_graph
+        description: 当更新角色信息时，更新人物关系图
+      - target: scenes
+        action: update_character_scenes
+        description: 当角色信息更新时，更新该角色相关场景
+  
+  - trigger:
+      step: relationships
+      action: update
+    effects:
+      - target: scenes
+        action: update_relationship_scenes
+        description: 当人物关系更新时，更新相关场景的互动描述
+      - target: clues
+        action: update_related_clues
+        description: 当人物关系更新时，更新相关线索
+  
+  - trigger:
+      step: clues
+      action: update
+    effects:
+      - target: scenes
+        action: update_clue_distribution
+        description: 当线索更新时，更新线索在场景中的分布
+  
+  - trigger:
+      step: scenes
+      action: update
+    effects:
+      - target: draft
+        action: update_scene_content
+        description: 当场景更新时，更新剧本初稿中对应的内容
+
+# 工作流节点间切换机制
+navigation:
+  save_state: true  # 切换时保存当前状态
+  validation:
+    enabled: true  # 启用验证
+    prompt_on_error: true  # 验证失败时提示用户
+  quick_access:
+    enabled: true  # 启用快速访问菜单
+    show_recent: 3  # 显示最近访问的3个步骤
+
+# 数据同步机制
+data_sync:
+  auto_save:
+    enabled: true
+    interval: 60  # 秒
+    notification: true  # 显示保存通知
+  
+  conflict_resolution:
+    strategy: prompt  # 冲突解决策略: prompt, newer, merge
+    keep_history: true  # 保留修改历史
+  
+  real_time_collaboration:
+    enabled: false  # 未来功能
+    conflict_highlight: true  # 高亮冲突区域
+
+# AI辅助功能
+ai_assistance:
+  enabled: true
+  features:
+    - name: content_suggestion
+      description: 基于已有内容提供创作建议
+      triggers:
+        - idle_time: 300  # 秒
+        - explicit_request: true
+      
+    - name: consistency_check
+      description: 检查不同步骤间的内容一致性
+      triggers:
+        - step_transition: true
+        - explicit_request: true
+      
+    - name: relationship_insight
+      description: 分析人物关系并提供洞察
+      triggers:
+        - relationship_update: true
+        - explicit_request: true
+
+# 通知与提醒系统
+notifications:
+  sync_complete:
+    enabled: true
+    visual: true
+    audio: false
+  
+  collaboration_updates:
+    enabled: true
+    visual: true
+    audio: false
+  
+  ai_suggestions:
+    enabled: true
+    visual: true
+    audio: false
+    frequency: medium  # low, medium, high
+
+# 配置与个性化
+settings:
+  themes:
+    dark_mode: auto  # auto, always, never
+    accent_color: blue  # blue, green, purple, red
+  
+  workflow_customization:
+    reorder_steps: false  # 允许重新排序步骤
+    disable_steps: true  # 允许禁用某些步骤
+    custom_steps: false  # 允许添加自定义步骤
+  
+  shortcuts:
+    enabled: true
+    customizable: true 
