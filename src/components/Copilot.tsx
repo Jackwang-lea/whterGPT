@@ -507,7 +507,7 @@ export default function Copilot() {
         }}
       >
         <div 
-          className={`relative overflow-hidden rounded-lg transition-all duration-300 ease-in-out ${isExpanded ? 'h-[450px]' : 'h-12'} 
+          className={`relative overflow-hidden rounded-lg transition-all duration-300 ease-in-out ${isExpanded ? 'h-[520px]' : 'h-12'} 
           bg-white border border-gray-200 shadow-lg ${!isDragging ? 'hover:border-blue-300' : ''}`}
         >
           {/* Header */}
@@ -614,9 +614,9 @@ export default function Copilot() {
                   )}
                 </div>
               ) : (
-                <>
-                  {/* Messages area */}
-                  <div className="h-60 overflow-y-auto p-3 bg-gray-50 scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100">
+                <div className="flex flex-col h-[calc(100%-48px)]">
+                  {/* Messages area - 减少高度给其他组件留出空间 */}
+                  <div className="h-52 overflow-y-auto p-3 bg-gray-50 scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100">
                     {messages.length === 0 ? (
                       <div className="text-center py-6 text-gray-500">
                         <p>你好，我是你的剧本创作助手！</p>
@@ -660,7 +660,7 @@ export default function Copilot() {
                     <div ref={messagesEndRef} />
                   </div>
 
-                  {/* 模型选择 */}
+                  {/* 模型选择 - 保持紧凑 */}
                   <div className="px-2 py-1 border-t flex justify-center">
                     <div className="flex items-center space-x-2 text-sm">
                       <span className="text-gray-600">模型:</span>
@@ -687,8 +687,8 @@ export default function Copilot() {
                     </div>
                   </div>
 
-                  {/* Quick prompts */}
-                  <div className="p-2 border-t border-b flex gap-2 overflow-x-auto scrollbar-thin scrollbar-thumb-gray-300">
+                  {/* Quick prompts - 高度保持紧凑 */}
+                  <div className="p-1 border-t border-b flex gap-2 overflow-x-auto scrollbar-thin scrollbar-thumb-gray-300">
                     {quickPrompts.map((prompt) => (
                       <button
                         key={prompt.id}
@@ -706,7 +706,7 @@ export default function Copilot() {
                     ))}
                   </div>
 
-                  {/* Knowledge fragment search */}
+                  {/* Knowledge fragment search - 减小搜索区域高度 */}
                   <div className="p-2 border-b">
                     <input
                       type="text"
@@ -717,7 +717,7 @@ export default function Copilot() {
                     />
                     
                     {searchResults.length > 0 && (
-                      <div className="mt-2 max-h-20 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300">
+                      <div className="mt-1 max-h-16 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300">
                         {searchResults.map((fragment) => (
                           <div 
                             key={fragment.id}
@@ -736,28 +736,30 @@ export default function Copilot() {
                     )}
                   </div>
 
-                  {/* Input area */}
-                  <form onSubmit={handleSendMessage} className="p-2 flex items-center bg-white">
-                    <div className="flex-1 relative">
-                      <input
-                        type="text"
-                        value={inputValue}
-                        onChange={(e) => setInputValue(e.target.value)}
-                        className="w-full px-4 py-3 pr-12 border rounded-l-md focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200 bg-gray-50 placeholder-gray-400 pulse-on-hover"
-                        placeholder="输入你的问题或要求..."
-                        disabled={isAiProcessing}
-                      />
-                      <span className="absolute right-3 top-1/2 transform -translate-y-1/2 text-lg text-gray-400">🔍</span>
-                    </div>
-                    <button
-                      type="submit"
-                      className="px-5 py-3 bg-blue-600 text-white rounded-r-md hover:bg-blue-700 disabled:bg-gray-400 transition-all duration-200 hover:shadow-md flex items-center justify-center"
-                      disabled={!inputValue.trim() || isAiProcessing}
-                    >
-                      <span>{isAiProcessing ? '处理中' : '发送'}</span>
-                    </button>
-                  </form>
-                </>
+                  {/* Input area - 确保始终可见 */}
+                  <div className="mt-auto p-2 flex items-center bg-white">
+                    <form onSubmit={handleSendMessage} className="w-full flex items-center">
+                      <div className="flex-1 relative">
+                        <input
+                          type="text"
+                          value={inputValue}
+                          onChange={(e) => setInputValue(e.target.value)}
+                          className="w-full px-4 py-2 pr-12 border rounded-l-md focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200 bg-gray-50 placeholder-gray-400 pulse-on-hover"
+                          placeholder="输入你的问题或要求..."
+                          disabled={isAiProcessing}
+                        />
+                        <span className="absolute right-3 top-1/2 transform -translate-y-1/2 text-lg text-gray-400">🔍</span>
+                      </div>
+                      <button
+                        type="submit"
+                        className="px-4 py-2 bg-blue-600 text-white rounded-r-md hover:bg-blue-700 disabled:bg-gray-400 transition-all duration-200 hover:shadow-md flex items-center justify-center"
+                        disabled={!inputValue.trim() || isAiProcessing}
+                      >
+                        <span>{isAiProcessing ? '处理中' : '发送'}</span>
+                      </button>
+                    </form>
+                  </div>
+                </div>
               )}
             </>
           )}
