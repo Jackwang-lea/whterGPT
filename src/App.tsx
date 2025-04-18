@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { HashRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { ScriptProvider } from './context/ScriptContext';
 import { CopilotProvider } from './context/CopilotContext';
 import Home from './pages/Home';
