@@ -5,7 +5,6 @@
   <img src="https://img.shields.io/badge/TypeScript-5-blue?logo=typescript" alt="TypeScript 5" />
   <img src="https://img.shields.io/badge/Vite-latest-646CFF?logo=vite" alt="Vite" />
   <img src="https://img.shields.io/badge/Tailwind_CSS-latest-38B2AC?logo=tailwind-css" alt="Tailwind CSS" />
-  <img src="https://img.shields.io/badge/License-MIT-green" alt="MIT License" />
 </div>
 
 ## 📝 项目介绍

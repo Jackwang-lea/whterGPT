@@ -1,10 +1,25 @@
-<!doctype html>
-<html lang="en">
+<!DOCTYPE html>
+<html lang="zh">
   <head>
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/vite.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>一站式剧本杀工作台</title>
+    <title>剧本杀创作工具</title>
+    <script type="text/javascript">
+      // GitHub Pages 部署前端路由支持
+      (function() {
+        // 检查是否在GitHub Pages环境
+        const isGitHubPages = window.location.hostname.includes('github.io');
+        if (isGitHubPages && window.location.pathname.indexOf('/?') === -1) {
+          // 单页应用重定向处理
+          const segments = window.location.pathname.split('/');
+          const lastSegment = segments[segments.length - 1];
+          if (lastSegment && !lastSegment.includes('.')) {
+            window.location.href = window.location.origin + window.location.pathname.replace(lastSegment, '') + '/#/' + lastSegment;
+          }
+        }
+      })();
+    </script>
   </head>
   <body>
     <div id="root"></div>
