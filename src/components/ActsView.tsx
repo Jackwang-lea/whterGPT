@@ -22,18 +22,18 @@ export default function ActsView({ feedbackText, handleFeedbackSubmit, setFeedba
         
         {/* 角色视图和剧情视图切换 - 再向上移动 */}
         <div className="flex items-center self-start pr-[220px] -mt-14">
-          <span className="mr-2 text-sm">角色视图</span>
+          <span className={`mr-2 text-sm ${showCharactersView ? 'font-semibold' : ''}`}>角色视图</span>
           <div 
-            className="w-12 h-6 bg-gray-200 rounded-full p-1 cursor-pointer"
+            className="w-[70px] h-7 bg-gray-200 rounded-full p-1 cursor-pointer relative"
             onClick={() => setShowCharactersView(!showCharactersView)}
           >
             <div 
-              className={`w-4 h-4 rounded-full transform duration-300 ease-in-out ${
-                showCharactersView ? 'bg-black translate-x-6' : 'bg-gray-400 translate-x-0'
+              className={`w-6 h-6 rounded-full absolute top-[2px] transform transition-all duration-300 ease-in-out ${
+                showCharactersView ? 'translate-x-0 bg-gray-400' : 'translate-x-[38px] bg-black'
               }`}
             ></div>
           </div>
-          <span className="ml-2 text-sm">剧情视图</span>
+          <span className={`ml-2 text-sm ${!showCharactersView ? 'font-semibold' : ''}`}>剧情视图</span>
         </div>
       </div>
       
