@@ -12,6 +12,10 @@ export default function ScriptEditor() {
     if (currentScript) {
       setContent(currentScript.outline || '');
       setLastSavedContent(currentScript.outline || '');
+    } else {
+      // 如果没有当前剧本，设置一些默认文本
+      setContent('# 我的剧本大纲\n\n在这里编写你的剧本大纲...\n\n## 故事背景\n\n## 主要角色\n\n## 剧情梗概');
+      setLastSavedContent('');
     }
   }, [currentScript]);
 
@@ -43,16 +47,16 @@ export default function ScriptEditor() {
   useEffect(() => {
     // 在组件卸载前保存
     return () => {
-      if (content !== lastSavedContent) {
+      if (currentScript && content !== lastSavedContent) {
         updateOutline(content);
       }
     };
-  }, [content, lastSavedContent, updateOutline]);
+  }, [content, lastSavedContent, updateOutline, currentScript]);
 
   // 添加路由切换前保存
   useEffect(() => {
     const handleBeforeUnload = (e: BeforeUnloadEvent) => {
-      if (content !== lastSavedContent) {
+      if (currentScript && content !== lastSavedContent) {
         // 在页面关闭/刷新前保存
         updateOutline(content);
       }
@@ -62,7 +66,7 @@ export default function ScriptEditor() {
     return () => {
       window.removeEventListener('beforeunload', handleBeforeUnload);
     };
-  }, [content, lastSavedContent, updateOutline]);
+  }, [content, lastSavedContent, updateOutline, currentScript]);
 
   const showSaveSuccess = () => {
     setShowSaveNotification(true);
@@ -71,20 +75,14 @@ export default function ScriptEditor() {
     }, 2000);
   };
 
-  if (!currentScript) {
-    return (
-      <div className="flex items-center justify-center h-full">
-        <p className="text-gray-500">请先选择或创建一个剧本项目</p>
-      </div>
-    );
-  }
-
   const handleContentChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     setContent(e.target.value);
   };
 
   const handleSave = () => {
-    saveContent();
+    if (currentScript) {
+      saveContent();
+    }
   };
 
   // Function to highlight character references (@CharacterName)
@@ -126,15 +124,19 @@ export default function ScriptEditor() {
       )}
       
       <div className="bg-white shadow-sm border-b px-4 py-2 flex justify-between items-center">
-        <h1 className="text-xl font-semibold text-gray-800">{currentScript.title}</h1>
+        <h1 className="text-xl font-semibold text-gray-800">
+          {currentScript ? currentScript.title : "新剧本大纲"}
+        </h1>
         <div className="flex gap-2 items-center">
-          <span className="text-xs text-gray-500">
-            {content !== lastSavedContent ? '编辑中...' : '已保存'}
-          </span>
+          {currentScript && (
+            <span className="text-xs text-gray-500">
+              {content !== lastSavedContent ? '编辑中...' : '已保存'}
+            </span>
+          )}
           <button
             onClick={() => {
               // 切换到预览之前先保存
-              if (isEditing && content !== lastSavedContent) {
+              if (isEditing && currentScript && content !== lastSavedContent) {
                 saveContent();
               }
               setIsEditing(!isEditing);
@@ -143,7 +145,7 @@ export default function ScriptEditor() {
           >
             {isEditing ? '预览' : '编辑'}
           </button>
-          {isEditing && content !== lastSavedContent && (
+          {isEditing && currentScript && content !== lastSavedContent && (
             <button
               onClick={handleSave}
               className="px-3 py-1 text-sm bg-blue-600 text-white rounded-md hover:bg-blue-700"
@@ -161,7 +163,7 @@ export default function ScriptEditor() {
             onChange={handleContentChange}
             className="w-full h-full p-4 resize-none focus:outline-none font-mono"
             placeholder="在此处编写剧本大纲，可以使用 @角色名 来引用角色..."
-            onBlur={handleSave}
+            onBlur={currentScript ? handleSave : undefined}
           />
         ) : (
           <div 
@@ -170,6 +172,17 @@ export default function ScriptEditor() {
           />
         )}
       </div>
+      
+      {!currentScript && (
+        <div className="absolute inset-0 bg-white bg-opacity-80 flex items-center justify-center">
+          <div className="text-center p-6 max-w-md">
+            <div className="text-2xl font-bold mb-2">未找到剧本</div>
+            <p className="text-gray-600 mb-4">
+              当前没有可编辑的剧本。请先创建一个新剧本，或者刷新页面再试。
+            </p>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

@@ -8,7 +8,7 @@ const CURRENT_SCRIPT_ID_KEY = 'currentMurderMysteryScriptId';
 interface ScriptContextType {
   scripts: Script[];
   currentScript: Script | null;
-  createScript: (title: string, description: string) => void;
+  createScript: (title: string, description: string) => string;
   updateScript: (updatedScript: Script) => void;
   selectScript: (scriptId: string) => void;
   addCharacter: (character: Omit<Character, 'id' | 'relationships'>) => void;
@@ -91,6 +91,7 @@ export const ScriptProvider = ({ children }: { children: ReactNode }) => {
     
     setScripts([...scripts, newScript]);
     setCurrentScriptId(newScript.id);
+    return newScript.id;
   };
 
   const updateScript = (updatedScript: Script) => {
