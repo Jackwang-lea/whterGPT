@@ -13,16 +13,16 @@ export default function ActsView({ feedbackText, handleFeedbackSubmit, setFeedba
 
   return (
     <div className="flex-1 flex flex-col px-6 py-4">
-      {/* 分幕视图 */}
-      <div className="flex justify-between items-center mb-6 border-b pb-4">
+      {/* 分幕视图 - 调整顶部区域高度 */}
+      <div className="flex justify-between items-start mb-2 border-b pb-0">
         {/* 顶部只保留视图切换部分, 删除文风 */}
         <div className="flex items-center space-x-4">
           {/* 文风已删除 */}
         </div>
         
-        {/* 角色视图和剧情视图切换 */}
-        <div className="flex items-center">
-          <span className="mr-2">角色视图</span>
+        {/* 角色视图和剧情视图切换 - 再向上移动 */}
+        <div className="flex items-center self-start pr-[220px] -mt-14">
+          <span className="mr-2 text-sm">角色视图</span>
           <div 
             className="w-12 h-6 bg-gray-200 rounded-full p-1 cursor-pointer"
             onClick={() => setShowCharactersView(!showCharactersView)}
@@ -33,13 +33,7 @@ export default function ActsView({ feedbackText, handleFeedbackSubmit, setFeedba
               }`}
             ></div>
           </div>
-          <span className="ml-2">剧情视图</span>
-          
-          <div className="ml-8 flex space-x-2">
-            <button className="w-10 h-10 border-2 border-dashed rounded-md border-gray-400"></button>
-            <button className="w-10 h-10 border-2 border-dashed rounded-md border-gray-400"></button>
-            <button className="w-10 h-10 border-2 border-dashed rounded-md border-gray-400"></button>
-          </div>
+          <span className="ml-2 text-sm">剧情视图</span>
         </div>
       </div>
       
@@ -49,9 +43,9 @@ export default function ActsView({ feedbackText, handleFeedbackSubmit, setFeedba
           <thead>
             <tr>
               <th className="border p-3 bg-gray-50 font-medium text-sm">角色</th>
-              <th className="border p-3 bg-gray-50 font-medium text-sm">时间线</th>
+              <th className="border p-3 bg-gray-50 font-medium text-sm whitespace-nowrap">时间线</th>
               <th className="border p-3 bg-gray-50 font-medium text-sm">关键事件：</th>
-              <th className="border p-3 bg-gray-50 font-medium text-sm">情感变化</th>
+              <th className="border p-3 bg-gray-50 font-medium text-sm whitespace-nowrap">情感变化</th>
               <th className="border p-3 bg-gray-50 font-medium text-sm">人物关系：</th>
               <th className="border p-3 bg-gray-50 font-medium text-sm">人物塑造效果：</th>
             </tr>
@@ -59,16 +53,16 @@ export default function ActsView({ feedbackText, handleFeedbackSubmit, setFeedba
           <tbody>
             <tr className="border">
               <td className="border p-3 align-top" rowSpan={4}>
-                苏飞<br />卿
+                苏飞卿
               </td>
-              <td className="border p-3"></td>
+              <td className="border p-3 align-top"></td>
               <td className="border p-3 align-top">
                 <p>1. 主角苏飞卿从小被梦魇缠身，梦见一位金发女子在火海中消失</p>
                 <p>2. 苏飞卿违反军令私自出兵救援平安城，结果功亏一篑并受罚</p>
                 <p>3. 苏飞卿奉命入京为太子陪读</p>
                 <p>4. 苏飞卿处事谨慎却被卷入政治斗争</p>
               </td>
-              <td className="border p-3"></td>
+              <td className="border p-3 align-top"></td>
               <td className="border p-3 align-top">
                 <p>1. 苏飞卿与父母：传统的将门子弟，父严母慈，备受期待</p>
                 <p>2. 苏飞卿与太子：表兄弟关系，互相信任</p>
@@ -87,7 +81,7 @@ export default function ActsView({ feedbackText, handleFeedbackSubmit, setFeedba
       
       {/* 底部区域 */}
       <div className="mt-4 space-y-3">
-        {/* 对话气泡 - 移到底部 */}
+        {/* 对话气泡 - 确保能显示 */}
         <div className="w-full flex justify-end mb-2">
           <div className="relative max-w-[85%]">
             <div className="bg-black text-white py-3 px-4 rounded-xl">
@@ -104,6 +98,17 @@ export default function ActsView({ feedbackText, handleFeedbackSubmit, setFeedba
               }}
             ></div>
           </div>
+        </div>
+        
+        {/* 提示信息 */}
+        <div className="border border-gray-200 rounded-lg p-4 text-gray-600 max-w-5xl ml-4">
+          <p>根据xxxxxxxx，为您提供以下内容选择：</p>
+        </div>
+        
+        {/* 选项 - 修改为一行显示 */}
+        <div className="border border-gray-200 rounded-lg p-4 overflow-x-auto max-w-5xl ml-4 relative">
+          <div className="absolute right-0 top-0 bottom-0 w-1 bg-gray-400 rounded-full"></div>
+          <p className="text-sm pr-3 whitespace-nowrap">1. xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx</p>
         </div>
         
         {/* 大模型选择器 - 放在底部输入框上方 */}

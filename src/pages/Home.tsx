@@ -248,7 +248,7 @@ export default function Home() {
       {/* 中间编辑区 */}
       <div className={`flex flex-col border-r border-gray-200 overflow-auto ${selectedStep === 'acts' ? 'flex-1' : 'flex-1'}`}>
         {/* 步骤导航 */}
-        <div className="p-4 pt-16 flex items-center pl-8 space-x-1">
+        <div className="p-4 pt-16 flex items-center justify-between pl-8 pr-8">
           <div className="flex items-center">
             <button 
               className="px-4 py-2 rounded-md border border-gray-300 bg-white"
@@ -291,6 +291,13 @@ export default function Home() {
             >
               剧本
             </button>
+          </div>
+          
+          {/* 虚线框按钮组 - 移到导航栏右侧 */}
+          <div className="flex space-x-2">
+            <button className="w-10 h-10 border-2 border-dashed rounded-md border-gray-400"></button>
+            <button className="w-10 h-10 border-2 border-dashed rounded-md border-gray-400"></button>
+            <button className="w-10 h-10 border-2 border-dashed rounded-md border-gray-400"></button>
           </div>
         </div>
         
