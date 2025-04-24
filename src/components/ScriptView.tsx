@@ -8,6 +8,12 @@ interface ScriptViewProps {
   setFeedbackText: (text: string) => void;
 }
 
+// 模拟生成的选项数据
+interface GeneratedOption {
+  id: number;
+  content: string;
+}
+
 export default function ScriptView({ 
   selectedModel: initialModel, 
   feedbackText, 
@@ -28,6 +34,33 @@ export default function ScriptView({
   const [modelDropdownVisible, setModelDropdownVisible] = useState(false);
   const [knowledgeDropdownVisible, setKnowledgeDropdownVisible] = useState(false);
   
+  // 选项切换相关状态
+  const [currentOptionSet, setCurrentOptionSet] = useState(1); // 当前显示的选项集（1-3）
+  const [selectedOption, setSelectedOption] = useState<number | null>(null); // 当前选中的选项
+  const [isBoldFont, setIsBoldFont] = useState(false); // 字体粗细状态
+  
+  // 模拟三组不同的选项数据（模拟多次生成的不同结果）
+  const optionSets = [
+    // 第一组选项
+    [
+      { id: 1, content: "1. xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx" },
+      { id: 2, content: "2. xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx" },
+      { id: 3, content: "3. xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx" },
+    ],
+    // 第二组选项
+    [
+      { id: 1, content: "1. 角色A和角色B在酒吧偶遇，交谈甚欢，但却发现他们曾经有过纠葛，这段对话将揭示他们过去的故事..." },
+      { id: 2, content: "2. 角色A意外撞见角色B在进行一项秘密活动，这让角色A陷入是否应该揭发的道德困境..." },
+      { id: 3, content: "3. 角色A和角色B在一场聚会上针锋相对，但随着交谈深入，他们发现彼此有共同的敌人和目标..." },
+    ],
+    // 第三组选项
+    [
+      { id: 1, content: "1. 女主角和男主角在小镇咖啡馆偶遇，聊起往事时发现他们曾在童年有过一面之缘，这个巧合让两人产生好感..." },
+      { id: 2, content: "2. 女主角误入男主角的秘密工作室，发现了他一直隐藏的才能，这让她对他的看法完全改变..." },
+      { id: 3, content: "3. 女主角和男主角因为一个误会而产生冲突，但在解释清楚后，两人发现彼此都在为同一个理想而奋斗..." },
+    ]
+  ];
+  
   // 模型选项列表
   const modelOptions = [
     'claude35_sonnet2',
@@ -46,6 +79,22 @@ export default function ScriptView({
     '文学知识库',
     '自定义知识库'
   ];
+  
+  // 切换选项集（生成新的选项）
+  const switchOptionSet = () => {
+    setCurrentOptionSet((prev) => (prev % 3) + 1);
+    setSelectedOption(null);
+  };
+  
+  // 选择一个选项
+  const selectOption = (id: number) => {
+    setSelectedOption(id);
+  };
+  
+  // 切换字体粗细
+  const toggleFontWeight = () => {
+    setIsBoldFont(!isBoldFont);
+  };
   
   // 关闭所有下拉菜单的函数
   const closeAllDropdowns = () => {
@@ -228,23 +277,39 @@ export default function ScriptView({
               <p className="text-sm break-words">根据xxxxxxxx，为您提供以下内容选择：</p>
             </div>
             
+            {/* 字体切换按钮 */}
+            <div className="max-w-xl mx-auto flex justify-end mb-1">
+              <button
+                onClick={toggleFontWeight}
+                className="flex items-center text-gray-600 hover:text-gray-900 text-sm bg-gray-100 hover:bg-gray-200 rounded-md px-3 py-1 transition-colors"
+              >
+                <Icon icon="lucide:type" width="16" height="16" inline={true} className="mr-1" />
+                点击切换字体
+                {isBoldFont ? ' (细体)' : ' (粗体)'}
+              </button>
+            </div>
+            
             {/* 选择框 - 多个对齐排列 */}
             <div className="max-w-xl mx-auto space-y-2">
-              <div className="border border-gray-200 rounded-2xl p-4 bg-white shadow hover:shadow transition-shadow duration-200">
-                <p className="text-sm break-words">1. xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx</p>
-              </div>
-              
-              <div className="border border-gray-200 rounded-2xl p-4 bg-white shadow hover:shadow transition-shadow duration-200">
-                <p className="text-sm break-words">2. xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx</p>
-              </div>
-              
-              <div className="border border-gray-200 rounded-2xl p-4 bg-white shadow hover:shadow transition-shadow duration-200">
-                <p className="text-sm break-words">3. xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx</p>
-              </div>
+              {optionSets[currentOptionSet - 1].map((option) => (
+                <div 
+                  key={option.id}
+                  className={`border ${selectedOption === option.id ? 'border-blue-400 bg-blue-50' : 'border-gray-200 bg-white'} rounded-2xl p-4 shadow hover:shadow-md transition-shadow duration-200 cursor-pointer`}
+                  onClick={() => selectOption(option.id)}
+                >
+                  <p className={`${isBoldFont ? 'font-semibold' : 'font-normal'} ${selectedOption === option.id ? 'text-blue-800' : 'text-gray-700'} text-sm break-words`}>
+                    {option.content}
+                  </p>
+                </div>
+              ))}
               
               {/* 点击替换提示 */}
-              <div className="border border-gray-200 rounded-2xl p-4 text-gray-600 bg-white shadow-sm hover:shadow transition-shadow duration-200">
+              <div 
+                onClick={switchOptionSet}
+                className="border border-gray-200 rounded-2xl p-4 text-gray-600 bg-white shadow-sm hover:shadow-md transition-shadow duration-200 cursor-pointer flex justify-between items-center"
+              >
                 <p className="text-gray-700 text-sm break-words">点击替换。这个方向对吗? 还是从xxxxxxxxxx展开?</p>
+                <Icon icon="lucide:refresh-cw" width="18" height="18" className="text-gray-500" />
               </div>
             </div>
             
