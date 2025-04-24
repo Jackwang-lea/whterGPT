@@ -24,6 +24,20 @@ export default function Home() {
   const [knowledgeCollapsed, setKnowledgeCollapsed] = useState(false);
   const [workflowCollapsed, setWorkflowCollapsed] = useState(false);
   
+  // 右侧编辑器状态
+  const [isEditing, setIsEditing] = useState(false);
+  const [plotTitle, setPlotTitle] = useState('分幕剧情12: xxxxxxxxxxxxxxxxxxxxxxxxxxxxxx');
+  const [editPlotTitle, setEditPlotTitle] = useState('');
+  const [plotContent, setPlotContent] = useState([
+    'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx xx',
+    'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx xx',
+    'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx',
+    'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx xxx',
+    'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx',
+    'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx'
+  ]);
+  const [editPlotContent, setEditPlotContent] = useState<string[]>([]);
+  
   // 处理反馈提交
   const handleFeedbackSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -51,6 +65,32 @@ export default function Home() {
   // 切换工作流折叠状态
   const toggleWorkflow = () => {
     setWorkflowCollapsed(!workflowCollapsed);
+  };
+  
+  // 开始编辑剧情
+  const startEditing = () => {
+    setEditPlotTitle(plotTitle);
+    setEditPlotContent([...plotContent]);
+    setIsEditing(true);
+  };
+  
+  // 取消编辑
+  const cancelEditing = () => {
+    setIsEditing(false);
+  };
+  
+  // 保存编辑
+  const saveEditing = () => {
+    setPlotTitle(editPlotTitle);
+    setPlotContent([...editPlotContent]);
+    setIsEditing(false);
+  };
+  
+  // 更新特定段落的内容
+  const updateParagraph = (index: number, content: string) => {
+    const newContent = [...editPlotContent];
+    newContent[index] = content;
+    setEditPlotContent(newContent);
   };
   
   return (
@@ -360,7 +400,7 @@ export default function Home() {
         className={`flex flex-col border-r border-gray-200 overflow-auto transition-all duration-300 ease-in-out ${
           selectedStep === 'acts' ? 'flex-1' : 'flex-1'
         } ${sidebarCollapsed ? 'ml-0' : 'ml-0'}`}
-        style={{width: sidebarCollapsed ? 'calc(100% - 33.333%)' : 'calc(100% - 33.333% - 16rem)'}}
+        style={{width: sidebarCollapsed ? 'calc(100% - 45%)' : 'calc(100% - 45% - 16rem)'}}
       >
         {/* 步骤导航 */}
         <div className="p-4 pt-16 flex items-center justify-center">
@@ -436,9 +476,9 @@ export default function Home() {
       
       {/* 右侧预览区 - 仅在非分幕视图下显示 */}
       {selectedStep !== 'acts' && (
-        <div className="w-96 flex flex-col transition-all duration-300 ease-in-out">
+        <div className="w-2/5 flex flex-col transition-all duration-300 ease-in-out min-w-[480px] border-l border-gray-200">
           {/* 头部标题 */}
-          <div className="p-4 flex justify-between items-center border-b border-gray-200">
+          <div className="p-4 flex justify-between items-center border-b border-gray-200 bg-white">
             <h2 className="font-medium">第一本-第一幕 <span className="text-gray-400 text-sm">进入润色 ›</span></h2>
             <div className="flex space-x-2">
               <button className="w-6 h-6 border-2 border-dashed rounded-sm border-gray-400"></button>
@@ -448,63 +488,86 @@ export default function Home() {
           </div>
           
           {/* 分幕标题 */}
-          <div className="mx-4 my-4 border border-gray-200 rounded-lg p-3 flex justify-between items-center">
-            <span>分幕剧情12: xxxxxxxxxxxxxxxxxxxxxxxxxxxxxx</span>
-            <button className="text-blue-500 flex items-center">
-              <Icon icon="lucide:edit" width="18" height="18" inline={true} className="mr-1" />
-              修改剧情
-            </button>
+          <div className="mx-6 my-5 border border-gray-200 rounded-lg p-4 flex justify-between items-center bg-white shadow-sm">
+            {isEditing ? (
+              <input 
+                type="text" 
+                value={editPlotTitle}
+                onChange={(e) => setEditPlotTitle(e.target.value)}
+                className="flex-1 mr-2 px-2 py-1 border border-blue-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+              />
+            ) : (
+              <span className="text-base">{plotTitle}</span>
+            )}
+            {isEditing ? (
+              <div className="flex space-x-2">
+                <button 
+                  className="text-gray-500 flex items-center hover:text-gray-700"
+                  onClick={cancelEditing}
+                >
+                  <Icon icon="lucide:x" width="18" height="18" inline={true} className="mr-1" />
+                  取消
+                </button>
+                <button 
+                  className="text-green-500 flex items-center hover:text-green-700"
+                  onClick={saveEditing}
+                >
+                  <Icon icon="lucide:check" width="18" height="18" inline={true} className="mr-1" />
+                  保存
+                </button>
+              </div>
+            ) : (
+              <button 
+                className="text-blue-500 flex items-center hover:text-blue-700"
+                onClick={startEditing}
+              >
+                <Icon icon="lucide:edit" width="18" height="18" inline={true} className="mr-1" />
+                修改剧情
+              </button>
+            )}
           </div>
           
           {/* 内容列表 */}
-          <div className="px-4 flex-1 overflow-y-auto">
-            <ol className="list-decimal pl-5 space-y-6">
-              <li className="text-sm">
-                <p className="text-gray-700">xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
-                xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
-                xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
-                xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
-                xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
-                xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
-                xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
-                xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
-                xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
-                xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
-                xx</p>
-              </li>
-              
-              <li className="text-sm">
-                <p className="text-gray-700">xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
-                xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
-                xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
-                xx</p>
-              </li>
-              
-              <li className="text-sm">
-                <p className="text-gray-700">xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
-                xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
-                xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx</p>
-              </li>
-              
-              <li className="text-sm">
-                <p className="text-gray-700">xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
-                xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
-                xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
-                xxx</p>
-              </li>
-              
-              <li className="text-sm">
-                <p className="text-gray-700">xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
-                xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
-                xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx</p>
-              </li>
-              
-              <li className="text-sm">
-                <p className="text-gray-700">xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
-                xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
-                xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx</p>
-              </li>
-            </ol>
+          <div className="px-6 pb-6 flex-1 overflow-y-auto">
+            {isEditing ? (
+              // 编辑模式
+              <div className="space-y-4">
+                {editPlotContent.map((paragraph, index) => (
+                  <div key={index} className="flex space-x-3">
+                    <div className="mt-2 text-gray-600 font-medium text-base">{index + 1}.</div>
+                    <textarea
+                      value={paragraph}
+                      onChange={(e) => updateParagraph(index, e.target.value)}
+                      className="w-full border border-gray-300 rounded-md p-3 text-base focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      rows={4}
+                    />
+                  </div>
+                ))}
+                <div className="flex justify-end space-x-2 mt-4">
+                  <button 
+                    className="px-4 py-1.5 bg-gray-100 text-gray-700 rounded-md hover:bg-gray-200"
+                    onClick={cancelEditing}
+                  >
+                    取消
+                  </button>
+                  <button 
+                    className="px-4 py-1.5 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+                    onClick={saveEditing}
+                  >
+                    保存更改
+                  </button>
+                </div>
+              </div>
+            ) : (
+              // 预览模式
+              <ol className="list-decimal pl-8 space-y-8">
+                {plotContent.map((paragraph, index) => (
+                  <li key={index} className="text-base">
+                    <p className="text-gray-700 leading-relaxed">{paragraph}</p>
+                  </li>
+                ))}
+              </ol>
+            )}
           </div>
         </div>
       )}
