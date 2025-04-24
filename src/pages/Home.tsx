@@ -16,6 +16,9 @@ export default function Home() {
   // 角色视图与剧情视图切换
   const [showCharactersView, setShowCharactersView] = useState(true);
   
+  // 添加侧边栏折叠状态
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  
   // 处理反馈提交
   const handleFeedbackSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -25,10 +28,48 @@ export default function Home() {
     setFeedbackText('');
   };
   
+  // 切换侧边栏状态
+  const toggleSidebar = () => {
+    setSidebarCollapsed(!sidebarCollapsed);
+  };
+  
   return (
     <div className="flex h-screen bg-white">
-      {/* 左侧边栏 */}
-      <aside className="w-64 border-r border-gray-200 flex flex-col overflow-auto">
+      {/* 热区 - 当侧边栏折叠时显示 */}
+      {sidebarCollapsed && (
+        <div 
+          className="fixed left-0 top-0 w-4 h-full z-20"
+          onMouseEnter={() => setSidebarCollapsed(false)}
+        />
+      )}
+      
+      {/* 侧边栏折叠按钮 */}
+      <div 
+        className={`fixed top-1/2 transform -translate-y-1/2 z-10 transition-all duration-300 ${
+          sidebarCollapsed ? 'left-0' : 'left-64'
+        }`}
+      >
+        <button 
+          onClick={toggleSidebar}
+          className="bg-white border border-gray-200 rounded-r-md h-20 w-6 shadow-md hover:bg-gray-50 flex items-center justify-center transition-all duration-200 hover:text-blue-600"
+          title={sidebarCollapsed ? "展开侧边栏" : "收起侧边栏"}
+        >
+          <Icon 
+            icon={sidebarCollapsed ? "lucide:chevron-right" : "lucide:chevron-left"} 
+            width="16" 
+            height="16" 
+            className="text-gray-600" 
+          />
+        </button>
+      </div>
+      
+      {/* 左侧边栏 - 添加展开/折叠逻辑 */}
+      <aside 
+        className={`border-r border-gray-200 flex flex-col overflow-auto transition-all duration-300 ease-in-out ${
+          sidebarCollapsed ? 'w-0 opacity-0 overflow-hidden' : 'w-64 opacity-100'
+        }`}
+        onMouseEnter={() => sidebarCollapsed && setSidebarCollapsed(false)}
+      >
         {/* 菜单头部 */}
         <div className="p-4 flex space-x-2">
           <div className="w-3 h-3 rounded-full bg-gray-400"></div>
@@ -245,8 +286,13 @@ export default function Home() {
         </div>
       </aside>
       
-      {/* 中间编辑区 */}
-      <div className={`flex flex-col border-r border-gray-200 overflow-auto ${selectedStep === 'acts' ? 'flex-1' : 'flex-1'}`}>
+      {/* 中间编辑区 - 根据侧边栏状态调整宽度 */}
+      <div 
+        className={`flex flex-col border-r border-gray-200 overflow-auto transition-all duration-300 ease-in-out ${
+          selectedStep === 'acts' ? 'flex-1' : 'flex-1'
+        } ${sidebarCollapsed ? 'ml-0' : 'ml-0'}`}
+        style={{width: sidebarCollapsed ? 'calc(100% - 33.333%)' : 'calc(100% - 33.333% - 16rem)'}}
+      >
         {/* 步骤导航 */}
         <div className="p-4 pt-16 flex items-center justify-center">
           <div className="flex items-center">
@@ -321,7 +367,7 @@ export default function Home() {
       
       {/* 右侧预览区 - 仅在非分幕视图下显示 */}
       {selectedStep !== 'acts' && (
-        <div className="w-1/3 flex flex-col">
+        <div className="w-96 flex flex-col transition-all duration-300 ease-in-out">
           {/* 头部标题 */}
           <div className="p-4 flex justify-between items-center border-b border-gray-200">
             <h2 className="font-medium">第一本-第一幕 <span className="text-gray-400 text-sm">进入润色 ›</span></h2>

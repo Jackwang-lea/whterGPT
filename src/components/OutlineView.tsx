@@ -14,23 +14,65 @@ export default function OutlineView({ feedbackText, handleFeedbackSubmit, setFee
   const [exampleTemplate, setExampleTemplate] = useState<string>('《古相思曲》-大纲');
 
   return (
-    <div className="flex flex-1">
-      {/* 左侧内容区 */}
-      <div className="w-2/3 px-6 py-4 overflow-auto">
-        {/* 大纲设置 */}
-        <div className="mb-6 flex flex-wrap gap-4">
-          <div className="flex items-center">
-            <div className="text-base font-medium mr-4">大纲风格</div>
-            <div className="relative w-40">
+    <div className="flex h-full">
+      {/* 左侧内容区 - 使用flex-col确保正确的布局流 */}
+      <div className="w-2/3 px-6 py-4 flex flex-col h-full">
+        {/* 顶部设置部分 - 使用flex-shrink-0确保不被压缩 */}
+        <div className="flex-shrink-0">
+          {/* 大纲设置 */}
+          <div className="mb-6 flex flex-wrap gap-4">
+            <div className="flex items-center">
+              <div className="text-base font-medium mr-4">大纲风格</div>
+              <div className="relative w-40">
+                <select 
+                  className="block w-full px-4 py-2 appearance-none bg-white border border-gray-300 rounded-md focus:outline-none"
+                  value={outlineStyle}
+                  onChange={(e) => setOutlineStyle(e.target.value)}
+                >
+                  <option>古风情感</option>
+                  <option>现代都市</option>
+                  <option>科幻冒险</option>
+                  <option>悬疑推理</option>
+                </select>
+                <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
+                  <Icon icon="lucide:chevron-down" width="16" height="16" />
+                </div>
+              </div>
+            </div>
+
+            <div className="flex items-center">
+              <div className="text-base font-medium mr-4">关键设定</div>
+              <div className="relative w-40">
+                <select 
+                  className="block w-full px-4 py-2 appearance-none bg-white border border-gray-300 rounded-md focus:outline-none"
+                  value={settingType}
+                  onChange={(e) => setSettingType(e.target.value)}
+                >
+                  <option>逆向时空</option>
+                  <option>末世求生</option>
+                  <option>穿越重生</option>
+                  <option>虚拟游戏</option>
+                </select>
+                <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
+                  <Icon icon="lucide:chevron-down" width="16" height="16" />
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* 参考案例 */}
+          <div className="mb-6">
+            <div className="text-base font-medium mb-3">参考案例</div>
+            <div className="relative w-full">
               <select 
-                className="block w-full px-4 py-2 appearance-none bg-white border border-gray-300 rounded-md focus:outline-none"
-                value={outlineStyle}
-                onChange={(e) => setOutlineStyle(e.target.value)}
+                className="block w-full px-4 py-2 appearance-none bg-gray-100 border border-gray-300 rounded-md focus:outline-none text-violet-700"
+                value={exampleTemplate}
+                onChange={(e) => setExampleTemplate(e.target.value)}
               >
-                <option>古风情感</option>
-                <option>现代都市</option>
-                <option>科幻冒险</option>
-                <option>悬疑推理</option>
+                <option>《古相思曲》-大纲</option>
+                <option>《快剑侠风》-大纲</option>
+                <option>《长安三万里》-大纲</option>
+                <option>《琅琊榜》-大纲</option>
               </select>
               <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
                 <Icon icon="lucide:chevron-down" width="16" height="16" />
@@ -38,119 +80,82 @@ export default function OutlineView({ feedbackText, handleFeedbackSubmit, setFee
             </div>
           </div>
 
-          <div className="flex items-center">
-            <div className="text-base font-medium mr-4">关键设定</div>
-            <div className="relative w-40">
-              <select 
-                className="block w-full px-4 py-2 appearance-none bg-white border border-gray-300 rounded-md focus:outline-none"
-                value={settingType}
-                onChange={(e) => setSettingType(e.target.value)}
-              >
-                <option>逆向时空</option>
-                <option>末世求生</option>
-                <option>穿越重生</option>
-                <option>虚拟游戏</option>
-              </select>
-              <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
-                <Icon icon="lucide:chevron-down" width="16" height="16" />
+          {/* 可选方案 */}
+          <div className="mb-6 flex items-center">
+            <div className="text-base font-medium mr-4">可选方案</div>
+            <div className="flex items-center">
+              <Icon icon="simple-icons:anthropic" width="20" height="20" className="mr-2 text-purple-600" />
+              <div className="relative w-56">
+                <select 
+                  className="block w-full px-4 py-2 appearance-none bg-white border border-gray-300 rounded-md focus:outline-none"
+                  value={selectedModel}
+                  onChange={(e) => setSelectedModel(e.target.value)}
+                >
+                  <option>claude35_sonnet2</option>
+                  <option>gpt-4o</option>
+                  <option>gemini-1.5-pro</option>
+                </select>
+                <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
+                  <Icon icon="lucide:chevron-down" width="16" height="16" />
+                </div>
               </div>
             </div>
           </div>
         </div>
 
-        {/* 参考案例 */}
-        <div className="mb-6">
-          <div className="text-base font-medium mb-3">参考案例</div>
-          <div className="relative w-full">
-            <select 
-              className="block w-full px-4 py-2 appearance-none bg-gray-100 border border-gray-300 rounded-md focus:outline-none text-violet-700"
-              value={exampleTemplate}
-              onChange={(e) => setExampleTemplate(e.target.value)}
-            >
-              <option>《古相思曲》-大纲</option>
-              <option>《快剑侠风》-大纲</option>
-              <option>《长安三万里》-大纲</option>
-              <option>《琅琊榜》-大纲</option>
-            </select>
-            <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
-              <Icon icon="lucide:chevron-down" width="16" height="16" />
+        {/* 大纲内容区域 - 使用flex-1确保它填充剩余空间 */}
+        <div className="flex-1 flex flex-col overflow-auto">
+          <div className="space-y-4 flex-1">
+            <div className="p-4 border border-gray-300 rounded-lg max-h-32 overflow-auto bg-white">
+              <p className="text-sm text-gray-700">
+                xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+                xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+                xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+                xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+                xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+              </p>
+            </div>
+
+            <div className="p-4 border border-gray-300 rounded-lg max-h-32 overflow-auto bg-white">
+              <p className="text-sm text-gray-700">
+                xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+                xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+                xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+              </p>
+            </div>
+
+            <div className="p-4 border border-gray-300 rounded-lg max-h-32 overflow-auto bg-white">
+              <p className="text-sm text-gray-700">
+                xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+                xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+                xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+              </p>
             </div>
           </div>
-        </div>
 
-        {/* 可选方案 */}
-        <div className="mb-6 flex items-center">
-          <div className="text-base font-medium mr-4">可选方案</div>
-          <div className="flex items-center">
-            <Icon icon="simple-icons:anthropic" width="20" height="20" className="mr-2 text-purple-600" />
-            <div className="relative w-56">
-              <select 
-                className="block w-full px-4 py-2 appearance-none bg-white border border-gray-300 rounded-md focus:outline-none"
-                value={selectedModel}
-                onChange={(e) => setSelectedModel(e.target.value)}
-              >
-                <option>claude35_sonnet2</option>
-                <option>gpt-4o</option>
-                <option>gemini-1.5-pro</option>
-              </select>
-              <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
-                <Icon icon="lucide:chevron-down" width="16" height="16" />
-              </div>
-            </div>
+          {/* AI问答 - 固定在底部 */}
+          <div className="mt-auto pt-4 mb-4 flex-shrink-0">
+            <div className="text-sm font-medium text-gray-700 mb-4">Q: 您是想要这样的架空历史的大纲内容吗?</div>
+            <form onSubmit={handleFeedbackSubmit} className="border border-gray-200 rounded-lg p-4 bg-white shadow-sm">
+              <input
+                type="text"
+                placeholder="大纲不好? 告诉我如何优化，如: xxxxxx"
+                value={feedbackText}
+                onChange={(e) => setFeedbackText(e.target.value)}
+                className="w-full focus:outline-none text-gray-700"
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' && !e.shiftKey && feedbackText.trim()) {
+                    e.preventDefault();
+                    handleFeedbackSubmit(e);
+                  }
+                }}
+              />
+            </form>
           </div>
-        </div>
-
-        {/* 大纲内容区域 - 三个文本框 */}
-        <div className="space-y-4">
-          <div className="p-4 border border-gray-300 rounded-lg h-32 overflow-auto bg-white">
-            <p className="text-sm text-gray-700">
-              xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
-              xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
-              xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
-              xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
-              xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
-            </p>
-          </div>
-
-          <div className="p-4 border border-gray-300 rounded-lg h-32 overflow-auto bg-white">
-            <p className="text-sm text-gray-700">
-              xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
-              xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
-              xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
-            </p>
-          </div>
-
-          <div className="p-4 border border-gray-300 rounded-lg h-32 overflow-auto bg-white">
-            <p className="text-sm text-gray-700">
-              xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
-              xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
-              xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
-            </p>
-          </div>
-        </div>
-
-        {/* AI问答 */}
-        <div className="mt-6">
-          <div className="text-sm font-medium text-gray-700 mb-4">Q: 您是想要这样的架空历史的大纲内容吗?</div>
-          <form onSubmit={handleFeedbackSubmit} className="relative">
-            <input
-              type="text"
-              placeholder="大纲不好? 告诉我如何优化，如: xxxxxxx"
-              value={feedbackText}
-              onChange={(e) => setFeedbackText(e.target.value)}
-              className="w-full border border-gray-300 rounded-lg p-4 pr-12 focus:outline-none text-gray-700"
-            />
-            <button 
-              type="submit" 
-              className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700"
-            >
-              <Icon icon="lucide:send" width="20" height="20" />
-            </button>
-          </form>
         </div>
       </div>
 
-      {/* 右侧辅助信息 */}
+      {/* 右侧辅助信息 - 原样保留 */}
       <div className="w-1/3 border-l border-gray-200 px-6 py-4 overflow-auto">
         {/* 背景内容 */}
         <div className="mb-8">
