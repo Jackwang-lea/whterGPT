@@ -13,12 +13,14 @@ export default function CharacterView({ feedbackText, handleFeedbackSubmit, setF
   const [personalityType, setPersonalityType] = useState<string>('ENTJ');
   const [characterType, setCharacterType] = useState<string>('玩家');
   const [characterName, setCharacterName] = useState<string>('');
-  const [characterImage, setCharacterImage] = useState<string>('xxxxx.jpg');
-  const [emotionPercent, setEmotionPercent] = useState<string>('80%');
-  const [selectedCharacter, setSelectedCharacter] = useState<string>('角色1');
-  const [selectedEmotionType, setSelectedEmotionType] = useState<string>('事业线');
-  const [emotionKeyword, setEmotionKeyword] = useState<string>('"只差一步就能永远在一起"');
-  const [keywords, setKeywords] = useState<string[]>(['xxxx', 'xxxx']);
+  // 只保留在JSX中实际使用的变量
+  const characterImage = 'xxxxx.jpg'; // 在JSX中使用
+  // 以下变量暂时未使用，注释掉以避免警告
+  // const emotionPercent = '80%';
+  // const selectedCharacter = '角色1';
+  // const selectedEmotionType = '事业线';
+  // const emotionKeyword = '"只差一步就能永远在一起"';
+  const keywords = ['xxxx', 'xxxx']; // 在JSX中使用
 
   return (
     <div className="flex h-full">
@@ -203,7 +205,7 @@ export default function CharacterView({ feedbackText, handleFeedbackSubmit, setF
             <div className="text-sm font-medium text-gray-700 mb-2">关键词</div>
             <div className="relative">
               <div className="form-input border border-gray-300 rounded px-3 py-2 w-full text-sm flex items-center">
-                {keywords.map((keyword, index) => (
+                {keywords.map((keyword: string, index: number) => (
                   <span key={index} className="bg-gray-100 rounded px-2 py-1 text-xs mr-2">{keyword}</span>
                 ))}
               </div>

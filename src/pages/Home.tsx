@@ -6,15 +6,16 @@ import ScriptView from '../components/ScriptView';
 
 export default function Home() {
   // 状态管理
-  const { createScript } = useScriptContext();
-  const [selectedModel, setSelectedModel] = useState('claude35_sonnet2');
+  const { /* createScript */ } = useScriptContext();
+  const selectedModel = 'claude35_sonnet2'; // 暂时使用固定值
   const [feedbackText, setFeedbackText] = useState('');
   
   // 角色和步骤管理
   const [selectedStep, setSelectedStep] = useState<'outline' | 'characters' | 'relationships' | 'scenes' | 'acts' | 'script'>('script');
   
   // 角色视图与剧情视图切换
-  const [showCharactersView, setShowCharactersView] = useState(true);
+  // 暂时不使用这个状态
+  // const [showCharactersView, setShowCharactersView] = useState(true);
   
   // 添加侧边栏折叠状态
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);

@@ -14,13 +14,21 @@ export interface Script {
   currentStep: WorkflowStep;
   createdAt: number;
   updatedAt: number;
+  characters?: Character[];
+  scenes?: Scene[];
+  description?: string;
+  lastEditPosition?: {
+    step: WorkflowStep;
+    position: number;
+  };
 }
 
 export interface Character {
+  id: string;
   name: string;
   description: string;
   background: string;
-  relationships?: Record<string, string>; // characterId -> relationship description
+  relationships: Relationship[];
 }
 
 export interface Relationship {
@@ -34,8 +42,8 @@ export interface Scene {
   id: string;
   title: string;
   description: string;
-  characters: string[]; // character names
-  clues: string[]; // clue ids
+  characters: string[]; // character ids
+  clues?: string[]; // clue ids
   content: string;
   order: number;
 }

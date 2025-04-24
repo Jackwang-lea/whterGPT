@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+// App组件
 import { HashRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { ScriptProvider } from './context/ScriptContext';
 // 暂时注释掉以避免API错误

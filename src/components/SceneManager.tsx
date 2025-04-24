@@ -23,7 +23,7 @@ export default function SceneManager() {
   }
 
   // 按顺序排序的场景
-  const sortedScenes = [...currentScript.scenes].sort((a, b) => a.order - b.order);
+  const sortedScenes = [...(currentScript.scenes || [])].sort((a, b) => a.order - b.order);
 
   const handleEditScene = (scene: Scene) => {
     setEditingScene({ ...scene });
@@ -57,11 +57,11 @@ export default function SceneManager() {
     if (!currentScript) return;
 
     // 获取要删除的场景的序号
-    const sceneToDelete = currentScript.scenes.find(s => s.id === sceneId);
+    const sceneToDelete = (currentScript.scenes || []).find(s => s.id === sceneId);
     if (!sceneToDelete) return;
 
     // 筛选掉要删除的场景，并重新排序剩余场景
-    const updatedScenes = currentScript.scenes
+    const updatedScenes = (currentScript.scenes || [])
       .filter(s => s.id !== sceneId)
       .map(scene => {
         if (scene.order > sceneToDelete.order) {
@@ -88,13 +88,13 @@ export default function SceneManager() {
   const handleDrop = (targetSceneId: string) => {
     if (!draggedSceneId || draggedSceneId === targetSceneId || !currentScript) return;
 
-    const sourceScene = currentScript.scenes.find(s => s.id === draggedSceneId);
-    const targetScene = currentScript.scenes.find(s => s.id === targetSceneId);
+    const sourceScene = (currentScript.scenes || []).find(s => s.id === draggedSceneId);
+    const targetScene = (currentScript.scenes || []).find(s => s.id === targetSceneId);
 
     if (!sourceScene || !targetScene) return;
 
     // 创建新的顺序数组
-    const updatedScenes = currentScript.scenes.map(scene => {
+    const updatedScenes = (currentScript.scenes || []).map(scene => {
       if (scene.id === draggedSceneId) {
         return { ...scene, order: targetScene.order };
       }
@@ -134,7 +134,7 @@ export default function SceneManager() {
           参与角色
         </label>
         <div className="grid grid-cols-2 gap-2">
-          {currentScript?.characters.map(character => (
+          {(currentScript?.characters || []).map(character => (
             <div key={character.id} className="flex items-center">
               <input
                 type="checkbox"
@@ -164,7 +164,7 @@ export default function SceneManager() {
     if (!currentScript) return '无角色';
     
     const names = characterIds.map(id => {
-      const character = currentScript.characters.find(c => c.id === id);
+      const character = (currentScript.characters || []).find(c => c.id === id);
       return character?.name || '未知角色';
     });
     

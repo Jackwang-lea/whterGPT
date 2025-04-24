@@ -80,7 +80,7 @@ function debugLog(message: string, ...args: any[]): void {
 export default function Copilot() {
   debugLog('Copilot组件初始化');
   
-  const { messages, sendMessage, generateDraft, knowledgeFragments, searchKnowledgeFragments } = useCopilotContext();
+  const { messages, sendMessage, knowledgeFragments, searchKnowledgeFragments } = useCopilotContext();
   const { currentScript, updateOutline, addCharacter, setWorkflowStep } = useScriptContext();
   const [inputValue, setInputValue] = useState('');
   const [isExpanded, setIsExpanded] = useState(true);
@@ -185,7 +185,8 @@ export default function Copilot() {
     // 只有点击标题栏才能拖动
     if ((e.target as HTMLElement).closest('.copilot-drag-handle')) {
       e.preventDefault();
-      const boundingRect = dragRef.current.getBoundingClientRect();
+      // 获取拖动元素的位置信息（暂未使用）
+      dragRef.current.getBoundingClientRect();
       initialPos.current = { x: position.x, y: position.y };
       setDragStartPos({ x: e.clientX, y: e.clientY });
       setIsDragging(true);
@@ -513,7 +514,7 @@ export default function Copilot() {
           {/* Header */}
           <div 
             className="bg-blue-600 text-white p-3 flex justify-between items-center copilot-drag-handle select-none"
-            onClick={(e) => {
+            onClick={() => {
               // 确保只有当它不是拖动结束时才切换展开状态
               if (!isDragging) {
                 setIsExpanded(!isExpanded);

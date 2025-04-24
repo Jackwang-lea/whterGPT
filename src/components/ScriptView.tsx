@@ -8,11 +8,7 @@ interface ScriptViewProps {
   setFeedbackText: (text: string) => void;
 }
 
-// 模拟生成的选项数据
-interface GeneratedOption {
-  id: number;
-  content: string;
-}
+// 模拟生成的选项数据已移除
 
 export default function ScriptView({ 
   selectedModel: initialModel, 
@@ -24,7 +20,7 @@ export default function ScriptView({
   const [offsetX, setOffsetX] = useState(0);
   const [startX, setStartX] = useState(0);
   const isDraggingRef = useRef(false);
-  const [width, setWidth] = useState(0);
+  // width状态变量已移除
   
   // 添加状态来管理下拉菜单
   const [selectedModel, setSelectedModel] = useState(initialModel);

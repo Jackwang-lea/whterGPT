@@ -12,11 +12,13 @@ export default function CharacterManager() {
     relationship: Relationship;
   } | null>(null);
   const [newRelationship, setNewRelationship] = useState<{
-    targetId: string;
+    target: string;
+    source: string;
     type: string;
     description: string;
   }>({
-    targetId: '',
+    target: '',
+    source: '',
     type: '',
     description: ''
   });
@@ -61,19 +63,25 @@ export default function CharacterManager() {
   };
 
   const handleAddRelationship = () => {
-    if (!editingCharacter || !newRelationship.targetId || !newRelationship.type.trim()) return;
+    if (!editingCharacter || !newRelationship.target || !newRelationship.type.trim()) return;
     
     const updatedCharacter = {
       ...editingCharacter,
-      relationships: {
-        ...editingCharacter.relationships || {},
-        [newRelationship.targetId]: newRelationship.description || newRelationship.type
-      }
+      relationships: [
+        ...(editingCharacter.relationships || []),
+        {
+          source: editingCharacter.id,
+          target: newRelationship.target,
+          type: newRelationship.type,
+          description: newRelationship.description || newRelationship.type
+        }
+      ]
     };
     
     setEditingCharacter(updatedCharacter);
     setNewRelationship({
-      targetId: '',
+      target: '',
+      source: '',
       type: '',
       description: ''
     });
@@ -83,11 +91,13 @@ export default function CharacterManager() {
   const handleUpdateRelationship = () => {
     if (!editingCharacter || !editingRelationship) return;
     
-    const updatedRelationships = { 
-      ...editingCharacter.relationships || {}
+    const updatedRelationships = [...(editingCharacter.relationships || [])];
+    updatedRelationships[editingRelationship.index] = {
+      source: editingCharacter.id,
+      target: editingRelationship.relationship.target,
+      type: editingRelationship.relationship.type,
+      description: editingRelationship.relationship.description || editingRelationship.relationship.type
     };
-    updatedRelationships[editingRelationship.relationship.targetId] = 
-      editingRelationship.relationship.description || editingRelationship.relationship.type;
     
     setEditingCharacter({
       ...editingCharacter,
@@ -100,11 +110,8 @@ export default function CharacterManager() {
   const handleRemoveRelationship = (index: number) => {
     if (!editingCharacter || !editingCharacter.relationships) return;
     
-    const relationshipEntries = Object.entries(editingCharacter.relationships);
-    const keyToRemove = relationshipEntries[index][0];
-    
-    const updatedRelationships = { ...editingCharacter.relationships };
-    delete updatedRelationships[keyToRemove];
+    const updatedRelationships = [...editingCharacter.relationships];
+    updatedRelationships.splice(index, 1);
     
     setEditingCharacter({
       ...editingCharacter,
@@ -115,7 +122,7 @@ export default function CharacterManager() {
   // 获取其他可以建立关系的角色（排除当前编辑的角色）
   const getOtherCharacters = () => {
     if (!editingCharacter) return [];
-    return currentScript.characters.filter(c => c.id !== editingCharacter.id);
+    return (currentScript.characters || []).filter(c => c.id !== editingCharacter.id);
   };
 
   // 关系类型选项
@@ -142,14 +149,14 @@ export default function CharacterManager() {
           </button>
         </div>
 
-        {currentScript.characters.length === 0 ? (
+        {(currentScript.characters || []).length === 0 ? (
           <div className="p-4 text-center text-gray-500">
             <p>暂无角色</p>
             <p className="text-sm mt-1">点击上方按钮添加角色</p>
           </div>
         ) : (
           <ul>
-            {currentScript.characters.map(character => (
+            {(currentScript.characters || []).map(character => (
               <li
                 key={character.id}
                 onClick={() => handleEditCharacter(character)}
@@ -272,9 +279,10 @@ export default function CharacterManager() {
                         setShowAddRelationshipForm(true);
                         setEditingRelationship(null);
                         setNewRelationship({
-                          targetId: getOtherCharacters()[0]?.id || '',
+                          source: editingCharacter?.id || '',
+                          target: getOtherCharacters()[0]?.id || '',
                           type: '',
-                          description: '',
+                          description: ''
                         });
                       }}
                       className="px-3 py-1 text-sm bg-blue-600 text-white rounded-md hover:bg-blue-700"
@@ -294,10 +302,10 @@ export default function CharacterManager() {
                           选择角色
                         </label>
                         <select
-                          value={newRelationship.targetId}
+                          value={newRelationship.target}
                           onChange={e => setNewRelationship({
                             ...newRelationship,
-                            targetId: e.target.value
+                            target: e.target.value
                           })}
                           className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm"
                         >
@@ -351,7 +359,7 @@ export default function CharacterManager() {
                         <button
                           onClick={handleAddRelationship}
                           className="px-3 py-1 text-xs bg-blue-600 text-white rounded-md hover:bg-blue-700"
-                          disabled={!newRelationship.targetId || !newRelationship.type}
+                          disabled={!newRelationship.target || !newRelationship.type}
                         >
                           添加
                         </button>
@@ -370,12 +378,12 @@ export default function CharacterManager() {
                           角色
                         </label>
                         <select
-                          value={editingRelationship.relationship.targetId}
+                          value={editingRelationship.relationship.target}
                           onChange={e => setEditingRelationship({
                             ...editingRelationship,
                             relationship: {
                               ...editingRelationship.relationship,
-                              targetId: e.target.value
+                              target: e.target.value
                             }
                           })}
                           className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm"
@@ -436,7 +444,7 @@ export default function CharacterManager() {
                         <button
                           onClick={handleUpdateRelationship}
                           className="px-3 py-1 text-xs bg-blue-600 text-white rounded-md hover:bg-blue-700"
-                          disabled={!editingRelationship.relationship.targetId || !editingRelationship.relationship.type}
+                          disabled={!editingRelationship.relationship.target || !editingRelationship.relationship.type}
                         >
                           保存
                         </button>
@@ -448,17 +456,17 @@ export default function CharacterManager() {
                 {/* 现有关系列表 */}
                 {!editingRelationship && (
                   <div className="mt-3">
-                    {editingCharacter.relationships && Object.entries(editingCharacter.relationships).length > 0 ? (
+                    {editingCharacter.relationships && editingCharacter.relationships.length > 0 ? (
                       <ul className="space-y-2">
-                        {Object.entries(editingCharacter.relationships).map(([targetId, description], index) => {
-                          const targetCharacter = currentScript.characters.find(c => c.id === targetId);
+                        {editingCharacter.relationships.map((relationship, index) => {
+                          const targetCharacter = (currentScript.characters || []).find(c => c.id === relationship.target);
                           return (
-                            <li key={targetId} className="p-2 border rounded bg-gray-50 relative group">
+                            <li key={relationship.target} className="p-2 border rounded bg-gray-50 relative group">
                               <div className="font-medium">
                                 与 <span className="text-blue-600">{targetCharacter?.name || '未知角色'}</span> 的关系
                               </div>
-                              <div className="text-sm">类型: {targetId === description ? '自定义' : description}</div>
-                              <div className="text-sm">{targetId === description ? description : ''}</div>
+                              <div className="text-sm">类型: {relationship.type}</div>
+                              <div className="text-sm">{relationship.description}</div>
                               
                               {/* 操作按钮，鼠标悬停时显示 */}
                               <div className="absolute top-2 right-2 hidden group-hover:flex gap-1">
@@ -468,9 +476,10 @@ export default function CharacterManager() {
                                     setEditingRelationship({
                                       index,
                                       relationship: {
-                                        targetId,
-                                        type: targetId === description ? '自定义' : description,
-                                        description: targetId === description ? description : ''
+                                        source: relationship.source,
+                                        target: relationship.target,
+                                        type: relationship.type,
+                                        description: relationship.description
                                       }
                                     });
                                     setShowAddRelationshipForm(false);

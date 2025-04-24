@@ -37,11 +37,11 @@ export const ScriptProvider = ({ children }: { children: ReactNode }) => {
     if (savedScripts) {
       try {
         const parsedScripts = JSON.parse(savedScripts);
-        // 修复日期值（从字符串转回Date对象）
+        // 修复日期值
         return parsedScripts.map((script: any) => ({
           ...script,
-          createdAt: new Date(script.createdAt),
-          updatedAt: new Date(script.updatedAt),
+          createdAt: typeof script.createdAt === 'string' ? Date.parse(script.createdAt) : script.createdAt,
+          updatedAt: typeof script.updatedAt === 'string' ? Date.parse(script.updatedAt) : script.updatedAt,
         }));
       } catch (error) {
         console.error('Error parsing scripts from localStorage:', error);
@@ -81,8 +81,8 @@ export const ScriptProvider = ({ children }: { children: ReactNode }) => {
       id: crypto.randomUUID(),
       title,
       description,
-      createdAt: new Date(),
-      updatedAt: new Date(),
+      createdAt: Date.now(),
+      updatedAt: Date.now(),
       characters: [],
       scenes: [],
       outline: '',
@@ -97,7 +97,7 @@ export const ScriptProvider = ({ children }: { children: ReactNode }) => {
   const updateScript = (updatedScript: Script) => {
     const scriptWithUpdatedDate = {
       ...updatedScript,
-      updatedAt: new Date()
+      updatedAt: Date.now()
     };
     
     setScripts(scripts.map(script => 
@@ -122,7 +122,7 @@ export const ScriptProvider = ({ children }: { children: ReactNode }) => {
     
     updateScript({
       ...currentScript,
-      characters: [...currentScript.characters, newCharacter],
+      characters: [...(currentScript.characters || []), newCharacter],
     });
   };
 
@@ -131,7 +131,7 @@ export const ScriptProvider = ({ children }: { children: ReactNode }) => {
     
     updateScript({
       ...currentScript,
-      characters: currentScript.characters.map(c => 
+      characters: (currentScript.characters || []).map(c => 
         c.id === character.id ? character : c
       ),
     });
@@ -143,12 +143,12 @@ export const ScriptProvider = ({ children }: { children: ReactNode }) => {
     const newScene: Scene = {
       ...scene,
       id: crypto.randomUUID(),
-      order: currentScript.scenes.length,
+      order: (currentScript.scenes || []).length,
     };
     
     updateScript({
       ...currentScript,
-      scenes: [...currentScript.scenes, newScene],
+      scenes: [...(currentScript.scenes || []), newScene],
     });
   };
 
@@ -157,7 +157,7 @@ export const ScriptProvider = ({ children }: { children: ReactNode }) => {
     
     updateScript({
       ...currentScript,
-      scenes: currentScript.scenes.map(s => 
+      scenes: (currentScript.scenes || []).map(s => 
         s.id === scene.id ? scene : s
       ),
     });

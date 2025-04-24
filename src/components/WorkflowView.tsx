@@ -1,9 +1,9 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useScriptContext } from '../context/ScriptContext';
 import { WorkflowStep } from '../types';
 
 export default function WorkflowView() {
-  const { currentScript, setWorkflowStep, updateScript } = useScriptContext();
+  const { currentScript, updateScript } = useScriptContext();
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const [targetStep, setTargetStep] = useState<WorkflowStep | null>(null);
   const [stepWarning, setStepWarning] = useState<string | null>(null);
@@ -34,7 +34,7 @@ export default function WorkflowView() {
       label: '角色关系', 
       icon: '🔄',
       requiresPrevious: true,
-      validator: () => currentScript.characters.length >= 2, // 至少需要2个角色才能建立关系
+      validator: () => (currentScript.characters || []).length >= 2, // 至少需要2个角色才能建立关系
       warningMessage: '请先创建至少2个角色' 
     },
     { 
@@ -44,7 +44,7 @@ export default function WorkflowView() {
       requiresPrevious: true,
       validator: () => {
         // 检查是否至少有一个角色关系
-        return currentScript.characters.some(character => character.relationships.length > 0);
+        return (currentScript.characters || []).some((character: any) => character.relationships.length > 0);
       },
       warningMessage: '请先定义至少一个角色关系' 
     },
@@ -53,7 +53,7 @@ export default function WorkflowView() {
       label: '初稿', 
       icon: '📄',
       requiresPrevious: true,
-      validator: () => currentScript.scenes.length > 0, // 至少需要一个场景
+      validator: () => (currentScript.scenes || []).length > 0, // 至少需要一个场景
       warningMessage: '请先创建至少一个场景' 
     },
   ];
@@ -80,7 +80,7 @@ export default function WorkflowView() {
       }));
       
       // 如果有提取到角色且当前没有角色，就添加到脚本中
-      if (extractedCharacters.length > 0 && currentScript.characters.length === 0) {
+      if (extractedCharacters.length > 0 && (currentScript.characters || []).length === 0) {
         updatedScript.characters = extractedCharacters;
         updatedScript.currentStep = targetStepId;
         updateScript(updatedScript);
@@ -91,22 +91,23 @@ export default function WorkflowView() {
     // 如果从人物设定到角色关系，但还没有关系定义
     if (currentStepId === 'characters' && targetStepId === 'relationships') {
       // 检查是否所有角色都没有关系
-      const noRelationshipsDefined = currentScript.characters.every(char => 
+      const noRelationshipsDefined = (currentScript.characters || []).every((char: any) => 
         char.relationships.length === 0
       );
       
-      if (noRelationshipsDefined && currentScript.characters.length >= 2) {
+      if (noRelationshipsDefined && (currentScript.characters || []).length >= 2) {
         // 为简单起见，这里只是为第一个角色添加与第二个角色的关系
-        const updatedCharacters = [...currentScript.characters];
+        const updatedCharacters = [...(currentScript.characters || [])];
         if (updatedCharacters.length >= 2) {
           updatedCharacters[0] = {
             ...updatedCharacters[0],
             relationships: [
               ...updatedCharacters[0].relationships,
               {
-                targetId: updatedCharacters[1].id,
-                type: '认识',
-                description: '请编辑以详细描述关系'
+                target: updatedCharacters[1].id,
+                source: updatedCharacters[0].id,
+                type: '未知关系',
+                description: '请在此描述角色关系'
               }
             ]
           };
@@ -120,13 +121,13 @@ export default function WorkflowView() {
     }
     
     // 如果从角色关系到分幕，但还没有场景
-    if (currentStepId === 'relationships' && targetStepId === 'scenes' && currentScript.scenes.length === 0) {
+    if (currentStepId === 'relationships' && targetStepId === 'scenes' && (currentScript.scenes || []).length === 0) {
       // 创建一个基础场景
       const newScene = {
         id: crypto.randomUUID(),
         title: '第一幕',
         description: '基于角色关系的初始场景',
-        characters: currentScript.characters.map(char => char.id), // 包含所有角色
+        characters: (currentScript.characters || []).map((char: any) => char.id), // 包含所有角色
         content: '在此编写场景内容',
         order: 0
       };
@@ -140,12 +141,12 @@ export default function WorkflowView() {
     // 如果从分幕到初稿，但初稿为空
     if (currentStepId === 'scenes' && targetStepId === 'draft') {
       // 基于现有场景生成初稿框架
-      const draftSections = currentScript.scenes
-        .sort((a, b) => a.order - b.order)
-        .map(scene => 
+      const draftSections = (currentScript.scenes || [])
+        .sort((a: any, b: any) => a.order - b.order)
+        .map((scene: any) => 
           `## ${scene.title}\n\n${scene.description}\n\n参与角色：${
-            scene.characters.map(charId => {
-              const character = currentScript.characters.find(c => c.id === charId);
+            scene.characters.map((charId: string) => {
+              const character = (currentScript.characters || []).find((c: any) => c.id === charId);
               return character ? character.name : '未知角色';
             }).join('、')
           }\n\n${scene.content}\n\n---\n\n`
@@ -237,6 +238,7 @@ export default function WorkflowView() {
             
             return (
               <div key={step.id} className="flex flex-col items-center">
+                {/* 使用水平布局 */}
                 <button
                   onClick={() => handleStepClick(step.id, index)}
                   className={`w-10 h-10 rounded-full flex items-center justify-center text-lg mb-1

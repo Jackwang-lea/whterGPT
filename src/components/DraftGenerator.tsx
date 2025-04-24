@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useScriptContext } from '../context/ScriptContext';
 
 export default function DraftGenerator() {
-  const { currentScript, updateScript, updateOutline } = useScriptContext();
+  const { currentScript, updateOutline } = useScriptContext();
   const [isGenerating, setIsGenerating] = useState(false);
   const [draftContent, setDraftContent] = useState('');
   const [showPreview, setShowPreview] = useState(false);
@@ -31,12 +31,12 @@ export default function DraftGenerator() {
     
     try {
       // 基于现有场景生成初稿框架
-      const draftSections = currentScript.scenes
+      const draftSections = (currentScript.scenes || [])
         .sort((a, b) => a.order - b.order)
         .map(scene => {
           // 获取参与此场景的角色
           const characters = scene.characters.map(charId => {
-            const character = currentScript.characters.find(c => c.id === charId);
+            const character = (currentScript.characters || []).find(c => c.id === charId);
             return character ? character : null;
           }).filter(c => c !== null);
           
@@ -54,7 +54,7 @@ export default function DraftGenerator() {
               if (!char1) return;
               
               char1.relationships.forEach(rel => {
-                const char2 = currentScript.characters.find(c => c.id === rel.targetId);
+                const char2 = (currentScript.characters || []).find(c => c.id === rel.target);
                 if (char2 && scene.characters.includes(char2.id)) {
                   relationshipNotes.push(`${char1.name}与${char2.name}：${rel.type} - ${rel.description}`);
                 }
@@ -90,7 +90,7 @@ export default function DraftGenerator() {
       
       // 添加人物列表
       let characterSection = `## 角色列表\n\n`;
-      currentScript.characters.forEach(character => {
+      (currentScript.characters || []).forEach(character => {
         characterSection += `### ${character.name}\n\n`;
         characterSection += `${character.description}\n\n`;
         characterSection += `**背景**：${character.background || '无背景信息'}\n\n`;
@@ -98,7 +98,7 @@ export default function DraftGenerator() {
         if (character.relationships.length > 0) {
           characterSection += `**与其他角色的关系**：\n`;
           character.relationships.forEach(rel => {
-            const target = currentScript.characters.find(c => c.id === rel.targetId);
+            const target = (currentScript.characters || []).find(c => c.id === rel.target);
             if (target) {
               characterSection += `- 与${target.name}：${rel.type} - ${rel.description}\n`;
             }

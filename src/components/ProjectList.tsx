@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useScriptContext } from '../context/ScriptContext';
-import { Script } from '../types';
 
 export default function ProjectList() {
   const { scripts, createScript, selectScript } = useScriptContext();
@@ -24,7 +23,7 @@ export default function ProjectList() {
     navigate(`/editor/${scriptId}`);
   };
 
-  const formatDate = (date: Date) => {
+  const formatDate = (date: number) => {
     return new Date(date).toLocaleDateString('zh-CN', {
       year: 'numeric',
       month: 'short',
@@ -66,8 +65,8 @@ export default function ProjectList() {
                 <h2 className="text-xl font-semibold mb-2 text-gray-800">{script.title}</h2>
                 <p className="text-gray-600 line-clamp-2 mb-4">{script.description}</p>
                 <div className="flex justify-between text-sm text-gray-500">
-                  <span>角色: {script.characters.length}</span>
-                  <span>场景: {script.scenes.length}</span>
+                  <span>角色: {(script.characters || []).length}</span>
+                  <span>场景: {(script.scenes || []).length}</span>
                 </div>
               </div>
               <div className="bg-gray-50 px-4 py-2 border-t flex justify-between items-center">

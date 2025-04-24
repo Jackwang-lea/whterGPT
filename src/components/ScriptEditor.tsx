@@ -25,10 +25,12 @@ export default function ScriptEditor() {
     updateOutline(content);
     setLastSavedContent(content);
     showSaveSuccess();
+    // 确保使用正确的属性名称
     saveEditPosition({
-      cursorPosition: document.activeElement instanceof HTMLTextAreaElement 
+      step: currentScript.currentStep,
+      position: document.activeElement instanceof HTMLTextAreaElement 
         ? document.activeElement.selectionStart 
-        : undefined
+        : 0
     });
   }, [content, currentScript, lastSavedContent, updateOutline, saveEditPosition]);
 
@@ -55,7 +57,7 @@ export default function ScriptEditor() {
 
   // 添加路由切换前保存
   useEffect(() => {
-    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+    const handleBeforeUnload = () => {
       if (currentScript && content !== lastSavedContent) {
         // 在页面关闭/刷新前保存
         updateOutline(content);
