@@ -248,45 +248,45 @@ export default function Home() {
       {/* 中间编辑区 */}
       <div className={`flex flex-col border-r border-gray-200 overflow-auto ${selectedStep === 'acts' ? 'flex-1' : 'flex-1'}`}>
         {/* 步骤导航 */}
-        <div className="p-4 pt-16 flex items-center justify-between pl-8 pr-8">
+        <div className="p-4 pt-16 flex items-center justify-center">
           <div className="flex items-center">
             <button 
-              className="px-4 py-2 rounded-md border border-gray-300 bg-white"
+              className={`px-6 py-2 border ${selectedStep === 'outline' ? 'bg-black text-white border-black' : 'bg-white border-gray-300'} rounded-md`}
               onClick={() => setSelectedStep('outline')}
             >
               大纲
             </button>
             <div className="w-5 h-[1px] bg-gray-300"></div>
             <button 
-              className="px-4 py-2 rounded-md border border-gray-300 bg-white"
+              className={`px-6 py-2 border ${selectedStep === 'characters' ? 'bg-black text-white border-black' : 'bg-white border-gray-300'} rounded-md`}
               onClick={() => setSelectedStep('characters')}
             >
               角色
             </button>
             <div className="w-5 h-[1px] bg-gray-300"></div>
             <button 
-              className="px-4 py-2 rounded-md border border-gray-300 bg-white"
+              className={`px-6 py-2 border ${selectedStep === 'relationships' ? 'bg-black text-white border-black' : 'bg-white border-gray-300'} rounded-md`}
               onClick={() => setSelectedStep('relationships')}
             >
               关系
             </button>
             <div className="w-5 h-[1px] bg-gray-300"></div>
             <button 
-              className="px-4 py-2 rounded-md border border-gray-300 bg-white"
+              className={`px-6 py-2 border ${selectedStep === 'scenes' ? 'bg-black text-white border-black' : 'bg-white border-gray-300'} rounded-md`}
               onClick={() => setSelectedStep('scenes')}
             >
               章节
             </button>
             <div className="w-5 h-[1px] bg-gray-300"></div>
             <button 
-              className={`px-4 py-2 rounded-md border ${selectedStep === 'acts' ? 'border-black bg-black text-white' : 'border-gray-300 bg-white'}`}
+              className={`px-6 py-2 border ${selectedStep === 'acts' ? 'bg-black text-white border-black' : 'bg-white border-gray-300'} rounded-md`}
               onClick={() => setSelectedStep('acts')}
             >
               分幕
             </button>
             <div className="w-5 h-[1px] bg-gray-300"></div>
             <button 
-              className={`px-4 py-2 rounded-md border ${selectedStep === 'script' ? 'border-black bg-black text-white' : 'border-gray-300 bg-white'}`}
+              className={`px-6 py-2 border ${selectedStep === 'script' ? 'bg-black text-white border-black' : 'bg-white border-gray-300'} rounded-md`}
               onClick={() => setSelectedStep('script')}
             >
               剧本
@@ -295,9 +295,6 @@ export default function Home() {
           
           {/* 虚线框按钮组 - 移到导航栏右侧 */}
           <div className="flex space-x-2">
-            <button className="w-10 h-10 border-2 border-dashed rounded-md border-gray-400"></button>
-            <button className="w-10 h-10 border-2 border-dashed rounded-md border-gray-400"></button>
-            <button className="w-10 h-10 border-2 border-dashed rounded-md border-gray-400"></button>
           </div>
         </div>
         
@@ -329,15 +326,9 @@ export default function Home() {
           <div className="p-4 flex justify-between items-center border-b border-gray-200">
             <h2 className="font-medium">第一本-第一幕 <span className="text-gray-400 text-sm">进入角色 ›</span></h2>
             <div className="flex space-x-2">
-              <button className="w-6 h-6 rounded-sm bg-gray-100 flex items-center justify-center">
-                <Icon icon="lucide:edit" width="14" height="14" inline={true} className="text-gray-500" />
-              </button>
-              <button className="w-6 h-6 rounded-sm bg-gray-100 flex items-center justify-center">
-                <Icon icon="lucide:copy" width="14" height="14" inline={true} className="text-gray-500" />
-              </button>
-              <button className="w-6 h-6 rounded-sm bg-gray-100 flex items-center justify-center">
-                <Icon icon="lucide:trash-2" width="14" height="14" inline={true} className="text-gray-500" />
-              </button>
+              <button className="w-6 h-6 border-2 border-dashed rounded-sm border-gray-400"></button>
+              <button className="w-6 h-6 border-2 border-dashed rounded-sm border-gray-400"></button>
+              <button className="w-6 h-6 border-2 border-dashed rounded-sm border-gray-400"></button>
             </div>
           </div>
           
