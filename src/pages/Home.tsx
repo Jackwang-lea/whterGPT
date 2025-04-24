@@ -324,7 +324,7 @@ export default function Home() {
         <div className="w-1/3 flex flex-col">
           {/* 头部标题 */}
           <div className="p-4 flex justify-between items-center border-b border-gray-200">
-            <h2 className="font-medium">第一本-第一幕 <span className="text-gray-400 text-sm">进入角色 ›</span></h2>
+            <h2 className="font-medium">第一本-第一幕 <span className="text-gray-400 text-sm">进入润色 ›</span></h2>
             <div className="flex space-x-2">
               <button className="w-6 h-6 border-2 border-dashed rounded-sm border-gray-400"></button>
               <button className="w-6 h-6 border-2 border-dashed rounded-sm border-gray-400"></button>
