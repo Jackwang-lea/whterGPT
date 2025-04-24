@@ -19,6 +19,11 @@ export default function Home() {
   // 添加侧边栏折叠状态
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   
+  // 添加作品集折叠状态
+  const [portfolioCollapsed, setPortfolioCollapsed] = useState(false);
+  const [knowledgeCollapsed, setKnowledgeCollapsed] = useState(false);
+  const [workflowCollapsed, setWorkflowCollapsed] = useState(false);
+  
   // 处理反馈提交
   const handleFeedbackSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -31,6 +36,21 @@ export default function Home() {
   // 切换侧边栏状态
   const toggleSidebar = () => {
     setSidebarCollapsed(!sidebarCollapsed);
+  };
+  
+  // 切换作品集折叠状态
+  const togglePortfolio = () => {
+    setPortfolioCollapsed(!portfolioCollapsed);
+  };
+  
+  // 切换知识库折叠状态
+  const toggleKnowledge = () => {
+    setKnowledgeCollapsed(!knowledgeCollapsed);
+  };
+  
+  // 切换工作流折叠状态
+  const toggleWorkflow = () => {
+    setWorkflowCollapsed(!workflowCollapsed);
   };
   
   return (
@@ -78,207 +98,256 @@ export default function Home() {
         </div>
         
         {/* 作品集 */}
-        <div className="py-4 px-6 border-b border-gray-200 flex justify-between items-center">
-          <span className="text-base font-medium">作品集</span>
-          <button className="text-xl font-light">
+        <div 
+          className="py-4 px-6 border-b border-gray-200 flex justify-between items-center cursor-pointer hover:bg-gray-50"
+          onClick={togglePortfolio}
+        >
+          <div className="flex items-center">
+            <Icon 
+              icon={portfolioCollapsed ? "lucide:chevron-right" : "lucide:chevron-down"} 
+              width="20" 
+              height="20" 
+              className="mr-2 text-gray-500"
+            />
+            <span className="text-base font-medium">作品集</span>
+          </div>
+          <button className="text-xl font-light" onClick={(e) => e.stopPropagation()}>
             <Icon icon="lucide:plus" width="20" height="20" inline={true} />
           </button>
         </div>
         
-        {/* 项目列表 */}
-        <div className="border-b border-gray-200">
-          <div className="py-2 px-6 flex items-center justify-between hover:bg-gray-50">
-            <div className="flex items-center">
-              <button className="mr-1">
-                <Icon icon="lucide:chevron-right" width="20" height="20" inline={true} />
-              </button>
-              <span>《xxxx》</span>
+        {/* 项目列表 - 根据折叠状态显示或隐藏 */}
+        {!portfolioCollapsed && (
+          <div className="border-b border-gray-200">
+            <div className="py-2 px-6 flex items-center justify-between hover:bg-gray-50">
+              <div className="flex items-center">
+                <button className="mr-1">
+                  <Icon icon="lucide:chevron-right" width="20" height="20" inline={true} />
+                </button>
+                <span>《xxxx》</span>
+              </div>
+              <div className="flex space-x-3">
+                <button className="text-gray-500 hover:text-gray-700">
+                  <Icon icon="lucide:download" width="18" height="18" inline={true} />
+                </button>
+                <button className="text-gray-500 hover:text-gray-700">
+                  <Icon icon="lucide:plus" width="18" height="18" inline={true} />
+                </button>
+              </div>
             </div>
-            <div className="flex space-x-3">
-              <button className="text-gray-500 hover:text-gray-700">
-                <Icon icon="lucide:download" width="18" height="18" inline={true} />
-              </button>
-              <button className="text-gray-500 hover:text-gray-700">
-                <Icon icon="lucide:plus" width="18" height="18" inline={true} />
-              </button>
+            
+            <div className="py-2 px-6 flex items-center justify-between hover:bg-gray-50">
+              <div className="flex items-center">
+                <button className="mr-1">
+                  <Icon icon="lucide:chevron-down" width="20" height="20" inline={true} />
+                </button>
+                <span>《xxxx》</span>
+              </div>
+              <div className="flex space-x-3">
+                <button className="text-gray-500 hover:text-gray-700">
+                  <Icon icon="lucide:download" width="18" height="18" inline={true} />
+                </button>
+                <button className="text-gray-500 hover:text-gray-700">
+                  <Icon icon="lucide:plus" width="18" height="18" inline={true} />
+                </button>
+              </div>
+            </div>
+            
+            {/* 角色剧本子节点 */}
+            <div className="py-2 px-6 pl-10 flex items-center justify-between hover:bg-gray-50">
+              <div className="flex items-center">
+                <button className="mr-1">
+                  <Icon icon="lucide:chevron-down" width="20" height="20" inline={true} />
+                </button>
+                <span className="font-medium">角色剧本</span>
+              </div>
+              <div className="flex space-x-3">
+                <button className="text-gray-500 hover:text-gray-700">
+                  <Icon icon="lucide:download" width="18" height="18" inline={true} />
+                </button>
+                <button className="text-gray-500 hover:text-gray-700">
+                  <Icon icon="lucide:plus" width="18" height="18" inline={true} />
+                </button>
+              </div>
+            </div>
+            
+            {/* 女1角色 */}
+            <div className="py-2 px-6 pl-14 flex items-center justify-between hover:bg-gray-50">
+              <div className="flex items-center">
+                <button className="mr-1">
+                  <Icon icon="lucide:chevron-down" width="20" height="20" inline={true} />
+                </button>
+                <span>女1: xxx</span>
+              </div>
+              <div className="flex space-x-3">
+                <button className="text-gray-500 hover:text-gray-700">
+                  <Icon icon="lucide:download" width="18" height="18" inline={true} />
+                </button>
+                <button className="text-gray-500 hover:text-gray-700">
+                  <Icon icon="lucide:plus" width="18" height="18" inline={true} />
+                </button>
+              </div>
+            </div>
+            
+            {/* 第一本等 */}
+            <div className="py-2 px-6 pl-20 flex items-center justify-between hover:bg-gray-50">
+              <div className="flex items-center">
+                <button className="mr-1">
+                  <Icon icon="lucide:chevron-right" width="20" height="20" inline={true} />
+                </button>
+                <span>第一本</span>
+              </div>
+              <div className="flex space-x-3">
+                <button className="text-gray-500 hover:text-gray-700">
+                  <Icon icon="lucide:download" width="18" height="18" inline={true} />
+                </button>
+                <button className="text-gray-500 hover:text-gray-700">
+                  <Icon icon="lucide:plus" width="18" height="18" inline={true} />
+                </button>
+              </div>
+            </div>
+            
+            <div className="py-2 px-6 pl-20 flex items-center justify-between hover:bg-gray-50">
+              <div className="flex items-center">
+                <button className="mr-1">
+                  <Icon icon="lucide:chevron-right" width="20" height="20" inline={true} />
+                </button>
+                <span>第二本</span>
+              </div>
+              <div className="flex space-x-3">
+                <button className="text-gray-500 hover:text-gray-700">
+                  <Icon icon="lucide:download" width="18" height="18" inline={true} />
+                </button>
+                <button className="text-gray-500 hover:text-gray-700">
+                  <Icon icon="lucide:plus" width="18" height="18" inline={true} />
+                </button>
+              </div>
+            </div>
+            
+            <div className="py-2 px-6 pl-20 flex items-center justify-between hover:bg-gray-50">
+              <div className="flex items-center">
+                <button className="mr-1">
+                  <Icon icon="lucide:chevron-right" width="20" height="20" inline={true} />
+                </button>
+                <span>第三本</span>
+              </div>
+              <div className="flex space-x-3">
+                <button className="text-gray-500 hover:text-gray-700">
+                  <Icon icon="lucide:download" width="18" height="18" inline={true} />
+                </button>
+                <button className="text-gray-500 hover:text-gray-700">
+                  <Icon icon="lucide:plus" width="18" height="18" inline={true} />
+                </button>
+              </div>
+            </div>
+            
+            {/* 女2角色 */}
+            <div className="py-2 px-6 pl-14 flex items-center justify-between hover:bg-gray-50">
+              <div className="flex items-center">
+                <button className="mr-1">
+                  <Icon icon="lucide:chevron-right" width="20" height="20" inline={true} />
+                </button>
+                <span>女2: xxx</span>
+              </div>
+              <div className="flex space-x-3">
+                <button className="text-gray-500 hover:text-gray-700">
+                  <Icon icon="lucide:download" width="18" height="18" inline={true} />
+                </button>
+                <button className="text-gray-500 hover:text-gray-700">
+                  <Icon icon="lucide:plus" width="18" height="18" inline={true} />
+                </button>
+              </div>
+            </div>
+            
+            {/* 主持人手册 */}
+            <div className="py-2 px-6 pl-14 flex items-center justify-between hover:bg-gray-50">
+              <div className="flex items-center">
+                <button className="mr-1">
+                  <Icon icon="lucide:chevron-right" width="20" height="20" inline={true} />
+                </button>
+                <span>主持人手册</span>
+              </div>
+              <div className="flex space-x-3">
+                <button className="text-gray-500 hover:text-gray-700">
+                  <Icon icon="lucide:download" width="18" height="18" inline={true} />
+                </button>
+                <button className="text-gray-500 hover:text-gray-700">
+                  <Icon icon="lucide:plus" width="18" height="18" inline={true} />
+                </button>
+              </div>
+            </div>
+            
+            {/* 物料 */}
+            <div className="py-2 px-6 pl-14 flex items-center justify-between hover:bg-gray-50">
+              <div className="flex items-center">
+                <button className="mr-1">
+                  <Icon icon="lucide:chevron-right" width="20" height="20" inline={true} />
+                </button>
+                <span>物料</span>
+              </div>
+              <div className="flex space-x-3">
+                <button className="text-gray-500 hover:text-gray-700">
+                  <Icon icon="lucide:download" width="18" height="18" inline={true} />
+                </button>
+                <button className="text-gray-500 hover:text-gray-700">
+                  <Icon icon="lucide:plus" width="18" height="18" inline={true} />
+                </button>
+              </div>
             </div>
           </div>
-          
-          <div className="py-2 px-6 flex items-center justify-between hover:bg-gray-50">
-            <div className="flex items-center">
-              <button className="mr-1">
-                <Icon icon="lucide:chevron-down" width="20" height="20" inline={true} />
-              </button>
-              <span>《xxxx》</span>
-            </div>
-            <div className="flex space-x-3">
-              <button className="text-gray-500 hover:text-gray-700">
-                <Icon icon="lucide:download" width="18" height="18" inline={true} />
-              </button>
-              <button className="text-gray-500 hover:text-gray-700">
-                <Icon icon="lucide:plus" width="18" height="18" inline={true} />
-              </button>
-            </div>
-          </div>
-          
-          {/* 角色剧本子节点 */}
-          <div className="py-2 px-6 pl-10 flex items-center justify-between hover:bg-gray-50">
-            <div className="flex items-center">
-              <button className="mr-1">
-                <Icon icon="lucide:chevron-down" width="20" height="20" inline={true} />
-              </button>
-              <span className="font-medium">角色剧本</span>
-            </div>
-            <div className="flex space-x-3">
-              <button className="text-gray-500 hover:text-gray-700">
-                <Icon icon="lucide:download" width="18" height="18" inline={true} />
-              </button>
-              <button className="text-gray-500 hover:text-gray-700">
-                <Icon icon="lucide:plus" width="18" height="18" inline={true} />
-              </button>
-            </div>
-          </div>
-          
-          {/* 女1角色 */}
-          <div className="py-2 px-6 pl-14 flex items-center justify-between hover:bg-gray-50">
-            <div className="flex items-center">
-              <button className="mr-1">
-                <Icon icon="lucide:chevron-down" width="20" height="20" inline={true} />
-              </button>
-              <span>女1: xxx</span>
-            </div>
-            <div className="flex space-x-3">
-              <button className="text-gray-500 hover:text-gray-700">
-                <Icon icon="lucide:download" width="18" height="18" inline={true} />
-              </button>
-              <button className="text-gray-500 hover:text-gray-700">
-                <Icon icon="lucide:plus" width="18" height="18" inline={true} />
-              </button>
-            </div>
-          </div>
-          
-          {/* 第一本等 */}
-          <div className="py-2 px-6 pl-20 flex items-center justify-between hover:bg-gray-50">
-            <div className="flex items-center">
-              <button className="mr-1">
-                <Icon icon="lucide:chevron-right" width="20" height="20" inline={true} />
-              </button>
-              <span>第一本</span>
-            </div>
-            <div className="flex space-x-3">
-              <button className="text-gray-500 hover:text-gray-700">
-                <Icon icon="lucide:download" width="18" height="18" inline={true} />
-              </button>
-              <button className="text-gray-500 hover:text-gray-700">
-                <Icon icon="lucide:plus" width="18" height="18" inline={true} />
-              </button>
-            </div>
-          </div>
-          
-          <div className="py-2 px-6 pl-20 flex items-center justify-between hover:bg-gray-50">
-            <div className="flex items-center">
-              <button className="mr-1">
-                <Icon icon="lucide:chevron-right" width="20" height="20" inline={true} />
-              </button>
-              <span>第二本</span>
-            </div>
-            <div className="flex space-x-3">
-              <button className="text-gray-500 hover:text-gray-700">
-                <Icon icon="lucide:download" width="18" height="18" inline={true} />
-              </button>
-              <button className="text-gray-500 hover:text-gray-700">
-                <Icon icon="lucide:plus" width="18" height="18" inline={true} />
-              </button>
-            </div>
-          </div>
-          
-          <div className="py-2 px-6 pl-20 flex items-center justify-between hover:bg-gray-50">
-            <div className="flex items-center">
-              <button className="mr-1">
-                <Icon icon="lucide:chevron-right" width="20" height="20" inline={true} />
-              </button>
-              <span>第三本</span>
-            </div>
-            <div className="flex space-x-3">
-              <button className="text-gray-500 hover:text-gray-700">
-                <Icon icon="lucide:download" width="18" height="18" inline={true} />
-              </button>
-              <button className="text-gray-500 hover:text-gray-700">
-                <Icon icon="lucide:plus" width="18" height="18" inline={true} />
-              </button>
-            </div>
-          </div>
-          
-          {/* 女2角色 */}
-          <div className="py-2 px-6 pl-14 flex items-center justify-between hover:bg-gray-50">
-            <div className="flex items-center">
-              <button className="mr-1">
-                <Icon icon="lucide:chevron-right" width="20" height="20" inline={true} />
-              </button>
-              <span>女2: xxx</span>
-            </div>
-            <div className="flex space-x-3">
-              <button className="text-gray-500 hover:text-gray-700">
-                <Icon icon="lucide:download" width="18" height="18" inline={true} />
-              </button>
-              <button className="text-gray-500 hover:text-gray-700">
-                <Icon icon="lucide:plus" width="18" height="18" inline={true} />
-              </button>
-            </div>
-          </div>
-          
-          {/* 主持人手册 */}
-          <div className="py-2 px-6 pl-14 flex items-center justify-between hover:bg-gray-50">
-            <div className="flex items-center">
-              <button className="mr-1">
-                <Icon icon="lucide:chevron-right" width="20" height="20" inline={true} />
-              </button>
-              <span>主持人手册</span>
-            </div>
-            <div className="flex space-x-3">
-              <button className="text-gray-500 hover:text-gray-700">
-                <Icon icon="lucide:download" width="18" height="18" inline={true} />
-              </button>
-              <button className="text-gray-500 hover:text-gray-700">
-                <Icon icon="lucide:plus" width="18" height="18" inline={true} />
-              </button>
-            </div>
-          </div>
-          
-          {/* 物料 */}
-          <div className="py-2 px-6 pl-14 flex items-center justify-between hover:bg-gray-50">
-            <div className="flex items-center">
-              <button className="mr-1">
-                <Icon icon="lucide:chevron-right" width="20" height="20" inline={true} />
-              </button>
-              <span>物料</span>
-            </div>
-            <div className="flex space-x-3">
-              <button className="text-gray-500 hover:text-gray-700">
-                <Icon icon="lucide:download" width="18" height="18" inline={true} />
-              </button>
-              <button className="text-gray-500 hover:text-gray-700">
-                <Icon icon="lucide:plus" width="18" height="18" inline={true} />
-              </button>
-            </div>
-          </div>
-        </div>
+        )}
         
         {/* 知识库 */}
-        <div className="py-4 px-6 border-b border-gray-200 flex justify-between items-center">
-          <span className="text-base font-medium">知识库</span>
-          <button className="text-xl font-light">
+        <div 
+          className="py-4 px-6 border-b border-gray-200 flex justify-between items-center cursor-pointer hover:bg-gray-50"
+          onClick={toggleKnowledge}
+        >
+          <div className="flex items-center">
+            <Icon 
+              icon={knowledgeCollapsed ? "lucide:chevron-right" : "lucide:chevron-down"} 
+              width="20" 
+              height="20" 
+              className="mr-2 text-gray-500"
+            />
+            <span className="text-base font-medium">知识库</span>
+          </div>
+          <button className="text-xl font-light" onClick={(e) => e.stopPropagation()}>
             <Icon icon="lucide:plus" width="20" height="20" inline={true} />
           </button>
         </div>
         
+        {/* 知识库内容（可以在这里添加） */}
+        {!knowledgeCollapsed && (
+          <div className="border-b border-gray-200 py-2 px-6 text-gray-500 text-sm">
+            暂无知识库内容
+          </div>
+        )}
+        
         {/* 工作流 */}
-        <div className="py-4 px-6 border-b border-gray-200 flex justify-between items-center">
-          <span className="text-base font-medium">工作流</span>
-          <button className="text-xl font-light">
+        <div 
+          className="py-4 px-6 border-b border-gray-200 flex justify-between items-center cursor-pointer hover:bg-gray-50"
+          onClick={toggleWorkflow}
+        >
+          <div className="flex items-center">
+            <Icon 
+              icon={workflowCollapsed ? "lucide:chevron-right" : "lucide:chevron-down"} 
+              width="20" 
+              height="20" 
+              className="mr-2 text-gray-500"
+            />
+            <span className="text-base font-medium">工作流</span>
+          </div>
+          <button className="text-xl font-light" onClick={(e) => e.stopPropagation()}>
             <Icon icon="lucide:plus" width="20" height="20" inline={true} />
           </button>
         </div>
+        
+        {/* 工作流内容（可以在这里添加） */}
+        {!workflowCollapsed && (
+          <div className="border-b border-gray-200 py-2 px-6 text-gray-500 text-sm">
+            暂无工作流内容
+          </div>
+        )}
         
         {/* 底部标识 */}
         <div className="mt-auto p-4 text-gray-400 text-sm">
